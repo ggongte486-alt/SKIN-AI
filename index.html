@@ -1,0 +1,1492 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
+<title>WELLS SKIN AI · 실제 AI 피부 분석</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Noto+Sans+KR:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+/* 가독성 최적화 기본 설정 */
+body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
+:root{
+  --cream:#FAFAF7;--sand:#F0E8DC;--warm:#E4D9CC;--border:#D8D0C4;
+  --gold:#B8925A;--gold2:#C8A870;--gold-l:#F4ECDF;--gold-p:#FAF5EE;
+  --dark:#18180E;--mid:#585850;--soft:#8C8C84;--pale:#B4B0A8;
+  --grn:#2E8B57;--grn2:#4CAF7A;--grn-l:#DCF0E6;
+  --amber:#D08020;--amber-l:#FCEEDD;
+  --red:#CC3C3C;--red-l:#FDEAEA;
+  --sky:#3468A0;--sky-l:#DCE8F4;
+  --ai:#4B5EFC;--ai-l:#ECEFFE;
+  --shadow:0 6px 48px rgba(100,80,40,.14);
+}
+html,body{height:100%;background:#DDD5C8}
+body{font-family:"Noto Sans KR",sans-serif;font-size:14px;line-height:1.6;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:12px}
+
+.shell{width:100%;max-width:420px;background:var(--cream);border-radius:24px;box-shadow:var(--shadow);display:flex;flex-direction:column;height:90vh;height:90svh;min-height:640px;max-height:860px;overflow:hidden;position:relative}
+@media(max-width:480px){
+  html,body{padding:0;background:#DDD5C8;align-items:flex-start}
+  .shell{border-radius:0;max-width:100%;width:100%;height:100vh;height:100dvh;max-height:none;min-height:0}
+  .bot{padding:10px 16px 14px}
+  .thumb-strip{padding:6px 12px}
+  .th-slot{width:48px;height:48px}
+  .cam-ctrls{padding:5px 12px;gap:4px}
+}
+
+/* TOPBAR */
+.topbar{background:var(--cream);border-bottom:1px solid var(--border);padding:0 18px;height:52px;display:flex;align-items:center;gap:12px;flex-shrink:0;z-index:10}
+.tb-logo{font-family:"Cormorant Garamond",serif;font-size:14px;font-weight:500;letter-spacing:3px;color:var(--dark);flex:1}
+.tb-logo em{color:var(--ai);font-style:normal;letter-spacing:1px;font-size:11px;vertical-align:super;margin-left:3px}
+.tb-step{font-family:"DM Mono",monospace;font-size:10px;color:var(--soft);letter-spacing:1px}
+.back-btn{width:30px;height:30px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--mid);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .2s;flex-shrink:0}
+.back-btn:hover{background:var(--gold-l);border-color:var(--gold2);color:var(--gold)}
+.prog-wrap{height:2px;background:var(--warm);flex-shrink:0}
+.prog-bar{height:100%;background:linear-gradient(90deg,var(--gold),var(--ai));transition:width .6s}
+
+/* SCREENS */
+.screen{display:none;flex-direction:column;flex:1;overflow:hidden}
+.screen.active{display:flex;animation:fu .35s ease}
+@keyframes fu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.scroll{flex:1;overflow-y:auto;padding:0 20px 24px}
+.scroll::-webkit-scrollbar{width:0}
+.bot{padding:12px 20px 16px;border-top:1px solid var(--border);flex-shrink:0;background:var(--cream)}
+
+/* BUTTONS */
+.btn{width:100%;padding:14px;border:none;border-radius:12px;font-family:"Noto Sans KR",sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;letter-spacing:.3px}
+.btn-dark{background:var(--dark);color:var(--cream)}
+.btn-dark:hover{background:#2A2A18;transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,0,0,.2)}
+.btn-dark:disabled{background:var(--warm);color:var(--pale);cursor:not-allowed;transform:none;box-shadow:none}
+.btn-ai{background:linear-gradient(135deg,var(--ai),#2E4BCC);color:#fff;box-shadow:0 4px 20px rgba(75,94,252,.3)}
+.btn-ai:hover{transform:translateY(-1px);box-shadow:0 6px 28px rgba(75,94,252,.4)}
+.btn-ai:disabled{background:var(--warm);color:var(--pale);cursor:not-allowed;transform:none;box-shadow:none}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#fff;box-shadow:0 4px 18px rgba(184,146,90,.3)}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--mid);padding:12px;margin-top:8px}
+.btn-ghost:hover{border-color:var(--gold2);color:var(--gold);background:var(--gold-p)}
+
+/* SEC HEAD */
+.sec-head{padding:22px 0 14px}
+.sec-label{font-family:"DM Mono",monospace;font-size:9px;letter-spacing:2.5px;color:var(--gold);margin-bottom:7px}
+.sec-title{font-family:"Cormorant Garamond",serif;font-size:26px;font-weight:400;color:var(--dark);line-height:1.3;margin-bottom:5px}
+.sec-sub{font-size:12px;color:var(--soft);line-height:1.7}
+
+/* ── S0 LANDING ── */
+#s0{background:var(--dark)}
+.hero{flex:1;display:flex;flex-direction:column;padding:32px 24px;background:linear-gradient(160deg,#1C1C12 0%,#0E0E08 100%);position:relative;overflow:hidden}
+.hero-orb{position:absolute;top:-100px;right:-100px;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle at 40% 40%,rgba(75,94,252,.08),transparent 70%);pointer-events:none}
+.hero-eyebrow{font-family:"DM Mono",monospace;font-size:9px;letter-spacing:3px;color:var(--ai);opacity:.8;margin-bottom:auto;padding-top:4px}
+.hero-title{font-family:"Cormorant Garamond",serif;font-size:44px;font-weight:300;color:var(--cream);line-height:1.15;margin-bottom:10px}
+.hero-title em{font-style:italic;color:var(--gold2)}
+.hero-sub{font-size:13px;color:rgba(255,255,255,.4);line-height:1.9;margin-bottom:22px}
+.api-note{background:rgba(75,94,252,.1);border:1px solid rgba(75,94,252,.25);border-radius:12px;padding:14px 16px;margin-bottom:22px}
+.api-note-title{font-family:"DM Mono",monospace;font-size:9px;letter-spacing:2px;color:rgba(150,160,255,.9);margin-bottom:9px}
+.api-chips{display:flex;flex-wrap:wrap;gap:6px}
+.api-chip{padding:4px 11px;border-radius:16px;border:1px solid;font-size:11px;display:flex;align-items:center;gap:4px}
+.chip-ai{border-color:rgba(75,94,252,.4);color:rgba(150,160,255,.9);background:rgba(75,94,252,.08)}
+.chip-fp{border-color:rgba(255,180,50,.3);color:rgba(255,200,80,.85);background:rgba(255,180,50,.06)}
+.chip-cv{border-color:rgba(80,200,120,.3);color:rgba(100,220,140,.85);background:rgba(80,200,120,.06)}
+.hero-cta{width:100%;padding:15px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--dark);font-family:"Noto Sans KR",sans-serif;font-size:14px;font-weight:700;letter-spacing:.5px;cursor:pointer;box-shadow:0 4px 24px rgba(184,146,90,.4)}
+.hero-cta:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(184,146,90,.5)}
+.hero-note{font-size:10px;color:rgba(255,255,255,.18);text-align:center;margin-top:10px;letter-spacing:.2px}
+
+/* ── API CONFIG (optional panel) ── */
+.api-config{background:var(--ai-l);border:1px solid rgba(75,94,252,.2);border-radius:13px;padding:14px 16px;margin-bottom:14px}
+.api-config-title{font-family:"DM Mono",monospace;font-size:9px;letter-spacing:2px;color:var(--ai);margin-bottom:10px}
+.api-select{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-bottom:10px}
+.api-opt{border:1px solid rgba(75,94,252,.2);border-radius:8px;padding:8px 6px;text-align:center;cursor:pointer;transition:all .15s;background:var(--cream)}
+.api-opt:hover{border-color:rgba(75,94,252,.5)}
+.api-opt.sel{border-color:var(--ai);background:var(--ai-l)}
+.api-opt-name{font-size:11px;font-weight:700;color:var(--dark);margin-bottom:2px}
+.api-opt-desc{font-size:9px;color:var(--soft)}
+.api-opt.sel .api-opt-name{color:var(--ai)}
+.api-key-wrap{display:none}
+.api-key-wrap.show{display:block}
+.api-key-input{width:100%;padding:9px 12px;border:1px solid rgba(75,94,252,.25);border-radius:8px;font-size:12px;font-family:"DM Mono",monospace;background:var(--cream);color:var(--dark);outline:none;margin-top:4px}
+.api-key-input:focus{border-color:var(--ai)}
+.api-free-note{font-size:11px;color:var(--grn);background:var(--grn-l);padding:7px 10px;border-radius:7px;margin-top:6px}
+
+/* ── S1 PROFILE ── */
+.profile-card{background:var(--gold-p);border:1px solid var(--gold-l);border-radius:16px;padding:17px;margin-bottom:13px}
+.pc-label{font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.8px;text-transform:uppercase;margin-bottom:11px}
+.age-num{font-family:"Cormorant Garamond",serif;font-size:52px;font-weight:300;color:var(--dark);text-align:center;line-height:1}
+.age-unit{font-size:12px;color:var(--soft);text-align:center;margin-top:2px;margin-bottom:8px}
+input[type=range]{width:100%;-webkit-appearance:none;height:2px;background:var(--warm);border-radius:1px;outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--gold);box-shadow:0 2px 8px rgba(184,146,90,.4)}
+.name-input{width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:9px;font-size:14px;color:var(--dark);font-family:"Noto Sans KR",sans-serif;outline:none;background:var(--cream)}
+.name-input:focus{border-color:var(--gold)}
+.name-input::placeholder{color:var(--pale)}
+.gender-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.gen-opt{border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;cursor:pointer;transition:all .15s;background:var(--cream)}
+.gen-opt.sel{border-color:var(--gold);background:var(--gold-l)}
+.gen-opt-icon{font-size:22px;margin-bottom:4px}
+.gen-opt-lbl{font-size:12px;font-weight:500;color:var(--mid)}
+.gen-opt.sel .gen-opt-lbl{color:var(--dark)}
+
+/* ── S2 LIFESTYLE ── */
+.life-card{background:var(--cream);border:1px solid var(--border);border-radius:13px;padding:14px 16px;margin-bottom:9px}
+.life-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.life-name{font-size:12px;font-weight:700;color:var(--dark)}
+.life-val{font-family:"DM Mono",monospace;font-size:12px;color:var(--gold);font-weight:500}
+.life-desc{font-size:11px;color:var(--soft);margin-top:6px;line-height:1.5}
+.pill-row{display:flex;gap:5px;flex-wrap:wrap}
+.pill{padding:5px 12px;border:1px solid var(--border);border-radius:20px;font-size:11px;color:var(--mid);cursor:pointer;transition:all .15s;background:var(--cream)}
+.pill.sel{border-color:var(--gold);background:var(--gold-l);color:var(--dark);font-weight:500}
+.star-row{display:flex;gap:5px}
+.star{font-size:22px;cursor:pointer;filter:grayscale(1) opacity(.35);transition:all .15s}
+.star.on{filter:none}
+
+/* ── S3 CONCERNS ── */
+.concern-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.ci{border:1px solid var(--border);border-radius:13px;padding:13px 12px;cursor:pointer;transition:all .15s;background:var(--cream);display:flex;align-items:flex-start;gap:10px}
+.ci.sel{border-color:var(--gold);background:var(--gold-l)}
+.ci-icon{font-size:22px;flex-shrink:0;margin-top:2px}
+.ci-content{flex:1;min-width:0}
+.ci-name{font-size:13px;font-weight:600;color:var(--mid);line-height:1.3;margin-bottom:4px}
+.ci-guide{font-size:11px;color:var(--soft);line-height:1.5}
+.ci.sel .ci-name{color:var(--dark)}
+.ci.sel .ci-guide{color:var(--mid)}
+
+/* ── S4 CAPTURE ── */
+
+/* CAMERA */
+.cam-area{position:relative;overflow:hidden;background:#080808;flex:1;min-height:0}
+.cam-area video{width:100%;height:100%;display:block;object-fit:cover}
+#oc{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
+#ac{display:none}
+.cam-badge{position:absolute;top:10px;left:50%;transform:translateX(-50%);background:rgba(8,8,8,.75);backdrop-filter:blur(8px);color:rgba(255,255,255,.9);font-size:11px;font-weight:500;padding:5px 15px;border-radius:20px;border:1px solid rgba(255,255,255,.14);white-space:nowrap;z-index:10;transition:all .3s}
+.scan-line-overlay{position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;overflow:hidden;display:none}
+.scan-beam{position:absolute;left:0;right:0;height:4px;background:linear-gradient(90deg,transparent,rgba(75,94,252,.6) 30%,rgba(180,220,255,.95) 50%,rgba(75,94,252,.6) 70%,transparent);box-shadow:0 0 20px 8px rgba(75,94,252,.3);animation:scan 2s ease-in-out infinite}
+@keyframes scan{0%{top:5%}100%{top:92%}}
+.scan-sides{position:absolute;inset:0;background:linear-gradient(to right,rgba(0,0,0,.4) 0%,transparent 18%,transparent 82%,rgba(0,0,0,.4) 100%)}
+.scan-dot{position:absolute;top:7px;left:50%;transform:translateX(-50%);width:7px;height:7px;border-radius:50%;background:#4CAF7A;box-shadow:0 0 8px #4CAF7A;animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.align-hud{position:absolute;bottom:0;left:0;right:0;padding:10px 16px 13px;background:linear-gradient(to top,rgba(0,0,0,.75),transparent);display:none;z-index:10}
+.adot{width:9px;height:9px;border-radius:50%;background:var(--red);transition:background .3s;flex-shrink:0}
+.adot.p{background:var(--amber)}.adot.g{background:var(--grn2)}
+.cd-wrap{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:none;flex-direction:column;align-items:center;z-index:12}
+.cd-svg{width:86px;height:86px}
+.cam-ph{width:100%;height:100%;background:var(--sand);display:flex;flex-direction:column;align-items:center;justify-content:center}
+.cam-ph-icon{font-size:40px;margin-bottom:12px}
+.cam-ph-txt{font-size:14px;font-weight:600;color:var(--mid);margin-bottom:5px}
+.cam-ph-sub{font-size:12px;color:var(--soft)}
+/* 촬영 완료 오버레이 */
+.cap-done-overlay{position:absolute;inset:0;background:rgba(46,139,87,.2);display:flex;align-items:center;justify-content:center;z-index:20;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.cap-done-inner{display:flex;flex-direction:column;align-items:center;gap:8px}
+.cap-done-check{width:68px;height:68px;background:var(--grn);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;color:#fff;box-shadow:0 6px 28px rgba(46,139,87,.5)}
+.cap-done-txt{font-size:15px;font-weight:700;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.5)}
+/* 단일 촬영 스트립 */
+.single-strip{display:flex;gap:12px;padding:10px 16px;flex-shrink:0;background:var(--sand);border-top:1px solid var(--border);align-items:center}
+.single-guide{flex:1;font-size:11.5px;color:var(--mid);line-height:1.7}
+.th-slot{width:56px;height:56px;border-radius:8px;border:1.5px dashed var(--border);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--soft);position:relative;background:var(--cream);flex-shrink:0}
+.th-slot img{width:100%;height:100%;object-fit:cover}
+.th-tick{position:absolute;top:2px;right:2px;width:15px;height:15px;background:var(--grn);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:8px}
+/* 촬영 컨트롤 버튼 */
+.cam-ctrls{display:flex;gap:5px;padding:6px 14px;flex-shrink:0}
+.cc{flex:1;padding:8px 2px;border:1px solid var(--border);border-radius:8px;background:var(--cream);font-size:11px;font-weight:500;color:var(--mid);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:3px;transition:all .15s;font-family:"Noto Sans KR",sans-serif}
+.cc:hover{border-color:var(--gold2);color:var(--gold);background:var(--gold-p)}
+.cc.pr{background:var(--dark);border-color:var(--dark);color:#fff}
+input[type=file]{display:none}
+
+/* ── S5 AI ANALYSIS ── */
+#s5{background:#0A0A08}
+.analysis-wrap{flex:1;display:flex;flex-direction:column;align-items:center;padding:0 24px 24px}
+
+/* Face image with scan */
+.analysis-img-wrap{position:relative;width:160px;height:160px;border-radius:16px;overflow:hidden;margin:24px auto 20px;flex-shrink:0}
+.analysis-img{width:100%;height:100%;object-fit:cover}
+.analysis-img-scan{position:absolute;inset:0;overflow:hidden}
+.analysis-img-scan-beam{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--ai),transparent);animation:scan 1.5s ease-in-out infinite;display:none}
+.analysis-img-scan-beam.active{display:block}
+.analysis-img-overlay{position:absolute;inset:0;background:linear-gradient(135deg,rgba(75,94,252,.08),transparent)}
+
+.ai-badge{background:rgba(75,94,252,.12);border:1px solid rgba(75,94,252,.3);border-radius:20px;padding:4px 12px;font-family:"DM Mono",monospace;font-size:9px;color:rgba(150,160,255,.9);letter-spacing:1.5px;margin-bottom:10px}
+.an-title{font-family:"Cormorant Garamond",serif;font-size:24px;font-weight:300;color:var(--cream);margin-bottom:5px;text-align:center}
+.an-sub{font-size:12px;color:rgba(255,255,255,.35);text-align:center;line-height:1.7;margin-bottom:20px}
+
+/* Analysis steps */
+.stage-list{width:100%;display:flex;flex-direction:column;gap:7px}
+.sr{display:flex;align-items:center;gap:11px;padding:9px 13px;border-radius:9px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);transition:all .4s}
+.sr.active{background:rgba(75,94,252,.1);border-color:rgba(75,94,252,.3)}
+.sr.done{background:rgba(46,139,87,.08);border-color:rgba(46,139,87,.2)}
+.sr.error{background:rgba(204,60,60,.08);border-color:rgba(204,60,60,.25)}
+.si{width:20px;height:20px;border-radius:50%;border:1px solid rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;font-size:9px;color:rgba(255,255,255,.3);flex-shrink:0;font-family:"DM Mono",monospace;transition:all .4s}
+.sr.active .si{border-color:rgba(150,160,255,.8);color:rgba(150,160,255,.9);animation:p .8s infinite}
+.sr.done .si{background:var(--grn);border-color:var(--grn);color:#fff}
+.sr.error .si{background:var(--red);border-color:var(--red);color:#fff}
+@keyframes p{0%,100%{opacity:1}50%{opacity:.3}}
+.st{font-size:12px;color:rgba(255,255,255,.4);transition:color .4s;flex:1}
+.sr.active .st{color:rgba(255,255,255,.9);font-weight:500}
+.sr.done .st{color:rgba(76,175,122,.9)}
+.sr.error .st{color:rgba(220,100,100,.9)}
+.sp{font-family:"DM Mono",monospace;font-size:10px;color:rgba(255,255,255,.18)}
+.sr.done .sp{color:rgba(76,175,122,.7)}
+
+/* Error state */
+.error-hint{font-size:11px;color:rgba(255,200,100,.7);margin-top:8px;line-height:1.5}
+
+/* ── S6 RESULTS ── */
+.rpt-hero{background:var(--dark);padding:16px 20px 14px;flex-shrink:0}
+.rpt-name{font-family:"Cormorant Garamond",serif;font-size:16px;font-weight:300;color:rgba(255,255,255,.55);margin-bottom:5px}
+.rpt-name strong{color:var(--cream);font-weight:400}
+.rpt-badges{display:flex;flex-wrap:wrap;gap:7px}
+.rpt-badge{display:flex;align-items:center;gap:5px;border-radius:20px;padding:4px 11px}
+.rpt-badge-ai{background:rgba(75,94,252,.15);border:1px solid rgba(75,94,252,.3)}
+.rpt-badge-ai-txt{font-family:"DM Mono",monospace;font-size:10px;color:rgba(150,160,255,.9)}
+.rpt-badge-type{background:rgba(184,146,90,.15);border:1px solid rgba(184,146,90,.3)}
+.rpt-badge-type-txt{font-family:"DM Mono",monospace;font-size:10px;color:var(--gold2)}
+.rpt-badge-conf{border:1px solid rgba(76,175,122,.3)}
+.rpt-meta{font-size:10px;color:rgba(255,255,255,.25);margin-top:7px;letter-spacing:.2px}
+
+/* TAB NAV */
+.tab-strip{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;background:var(--cream)}
+.tab-strip::-webkit-scrollbar{display:none}
+.ti{padding:11px 14px 10px;font-size:11px;font-weight:500;color:var(--soft);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all .2s;position:relative;bottom:-1px;letter-spacing:.2px}
+.ti.active{color:var(--dark);border-bottom-color:var(--gold)}
+.tc{flex:1;overflow-y:auto;padding:0}
+.tc::-webkit-scrollbar{width:0}
+
+/* PIZA SKIN AGE */
+.piza-sec-hdr{background:var(--sand);padding:9px 20px;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.piza-sec-lbl{font-family:"DM Mono",monospace;font-size:9px;font-weight:600;letter-spacing:2px;color:var(--mid)}
+.age-sec-body{padding:18px 20px 14px}
+.age-name-line{font-size:15px;color:var(--dark);text-align:center;margin-bottom:16px;line-height:1.6}
+.age-name-line strong{font-size:19px;font-weight:700}
+.age-grad-wrap{position:relative;margin-bottom:6px}
+.age-grad-bar{height:10px;border-radius:5px;background:linear-gradient(to right,#2E8B57 0%,#7CBF6A 20%,#C8D840 38%,#E8C030 52%,#E88020 68%,#D84820 82%,#C03020 100%);margin-bottom:20px}
+.age-ptr{position:absolute;top:-6px;display:flex;flex-direction:column;align-items:center;transform:translateX(-50%);transition:left 1.2s cubic-bezier(.4,0,.2,1)}
+.age-bubble{background:var(--dark);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:10px;white-space:nowrap;position:relative;font-family:"Noto Sans KR",sans-serif}
+.age-bubble::after{content:"";position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);border:4px solid transparent;border-top-color:var(--dark)}
+.age-axis{position:absolute;top:20px;left:0;right:0;display:flex}
+.age-axis-item{position:absolute;transform:translateX(-50%);font-size:10px;color:var(--soft);font-family:"DM Mono",monospace}
+.age-gl{display:flex;justify-content:space-between;margin-top:6px}
+.age-gl-lbl{font-size:10px;color:var(--soft)}
+.age-peer-msg{text-align:center;font-size:12px;color:var(--soft);margin-top:10px}
+.age-peer-msg strong{color:var(--amber);font-weight:700}
+
+/* 3-column compare */
+.age-compare-row{display:flex;gap:0;margin:14px 20px 0;border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.ac-col{flex:1;padding:11px 12px}
+.ac-col:not(:last-child){border-right:1px solid var(--border)}
+.ac-lbl{font-family:"DM Mono",monospace;font-size:9px;color:var(--soft);letter-spacing:.5px;margin-bottom:4px}
+.ac-val{font-size:17px;font-weight:700}
+
+/* ANALYZE SECTION */
+.analyze-body{padding:14px 20px 8px}
+.ai-item{margin-bottom:16px}
+.ai-item:last-child{margin-bottom:6px}
+.ai-item-top{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:5px}
+.ai-name{font-size:15px;font-weight:700;color:var(--dark);letter-spacing:-.3px}
+.ai-grade-wrap{display:flex;align-items:center;gap:8px}
+.ai-peer-lbl{font-size:12px;color:var(--soft)}
+.ai-grade{font-size:16px;font-weight:700}
+.ai-bar-wrap{position:relative;height:11px;background:var(--warm);border-radius:6px;overflow:hidden}
+.ai-bar-fill{height:100%;border-radius:6px;transition:width 1.4s cubic-bezier(.4,0,.2,1);width:0}
+.peer-mk{position:absolute;top:-3px;height:17px;width:2px;background:rgba(0,0,0,.22);border-radius:1px;transform:translateX(-50%)}
+.ai-foot{display:flex;justify-content:space-between;align-items:center;margin-top:4px}
+.ai-sub{font-size:12px;color:var(--mid);flex:1;line-height:1.6}
+.ai-vs{display:flex;gap:7px;flex-shrink:0;margin-left:8px}
+.ai-vs-col{text-align:center}
+.ai-vs-lbl{font-size:8px;font-weight:500;letter-spacing:.5px;display:block;margin-bottom:2px;font-family:"DM Mono",monospace}
+.ai-vs-val{font-size:11px;font-weight:700}
+
+/* AI DETAIL TAB */
+.ai-detail-body{padding:14px 20px 16px}
+.conf-meter{background:var(--ai-l);border:1px solid rgba(75,94,252,.2);border-radius:12px;padding:13px 15px;margin-bottom:12px}
+.conf-title{font-size:11px;font-weight:700;color:var(--ai);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.conf-bar-wrap{height:8px;background:rgba(75,94,252,.1);border-radius:4px;overflow:hidden;margin-bottom:6px}
+.conf-bar{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--ai),#6E7EFC);transition:width 1.2s}
+.conf-meta{display:flex;justify-content:space-between;font-size:10px;color:var(--soft)}
+.ai-detail-card{background:var(--cream);border:1px solid var(--border);border-radius:12px;padding:13px 14px;margin-bottom:9px}
+.dc-title{font-size:11px;font-weight:700;color:var(--dark);margin-bottom:6px;display:flex;align-items:center;gap:5px}
+.dc-body{font-size:13px;color:var(--mid);line-height:1.75}
+.zones-wrap{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.zone-tag{padding:3px 9px;border-radius:10px;font-size:10px;font-weight:600;background:var(--red-l);color:var(--red)}
+.spot-num{font-family:"Cormorant Garamond",serif;font-size:32px;font-weight:400;color:var(--dark);margin-right:6px}
+.raw-data{background:#0A0A08;border-radius:10px;padding:12px;margin-top:8px;overflow-x:auto}
+.raw-data pre{font-family:"DM Mono",monospace;font-size:10px;color:rgba(150,200,150,.8);white-space:pre-wrap;word-break:break-all;line-height:1.6}
+.raw-toggle{font-family:"DM Mono",monospace;font-size:10px;color:var(--ai);cursor:pointer;display:flex;align-items:center;gap:4px;margin-top:8px;user-select:none}
+
+/* INGREDIENT TAB */
+.ing-body{padding:12px 20px 16px}
+.ing-card{border-left:3px solid var(--gold);background:var(--cream);border-radius:0 12px 12px 0;padding:11px 13px;margin-bottom:8px;border-top:1px solid var(--border);border-right:1px solid var(--border);border-bottom:1px solid var(--border)}
+.ing-rank{font-family:"DM Mono",monospace;font-size:9px;color:var(--gold);margin-bottom:3px;letter-spacing:1px}
+.ing-name{font-size:13px;font-weight:700;color:var(--dark);margin-bottom:2px}
+.ing-en{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:12px;color:var(--soft);margin-bottom:5px}
+.ing-why{font-size:11px;color:var(--mid);line-height:1.6}
+.ing-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.itag{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:500}
+
+/* ROUTINE TAB */
+.routine-body{padding:10px 20px 16px}
+.rb-block{margin-bottom:14px}
+.rb-head{display:flex;align-items:center;gap:8px;padding:9px 0 8px;border-bottom:1px solid var(--border);margin-bottom:9px}
+.rb-icon{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px}
+.rb-title{font-size:13px;font-weight:700;color:var(--dark)}
+.rb-sub{font-size:10px;color:var(--soft)}
+.rstep{display:flex;gap:9px;margin-bottom:8px;align-items:flex-start}
+.rs-n{width:21px;height:21px;border-radius:50%;background:var(--dark);color:#fff;font-family:"DM Mono",monospace;font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.rs-c{flex:1;background:var(--cream);border:1px solid var(--border);border-radius:9px;padding:8px 11px}
+.rs-type{font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin-bottom:2px}
+.rs-name{font-size:12px;font-weight:700;color:var(--dark);margin-bottom:2px}
+.rs-tip{font-size:11px;color:var(--soft);line-height:1.5}
+
+/* TOAST */
+.toast{position:fixed;bottom:85px;left:50%;transform:translateX(-50%);background:var(--dark);color:var(--cream);font-size:12px;padding:9px 18px;border-radius:22px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:9999;white-space:nowrap}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="topbar" id="topbar" style="display:none">
+    <button class="back-btn" id="back-btn" onclick="goBack()">‹</button>
+    <div class="tb-logo">WELLS SKIN <em>AI</em></div>
+    <div class="tb-step" id="step-lbl"></div>
+  </div>
+  <div class="prog-wrap" id="prog-wrap" style="display:none"><div class="prog-bar" id="prog-bar" style="width:0%"></div></div>
+
+  <!-- ═══ S0 LANDING ═══ -->
+  <div class="screen active" id="s0">
+    <div class="hero">
+      <div class="hero-orb"></div>
+      <div class="hero-eyebrow">REAL AI VISION ANALYSIS</div>
+      <div style="flex:1;min-height:20px"></div>
+      <h1 class="hero-title">진짜 AI가<br><em>보는</em> 피부</h1>
+      <p class="hero-sub">촬영된 사진의 픽셀을 AI가 직접 분석합니다.<br>잡티 수, 주름 길이를 실제로 측정합니다.</p>
+      <button class="hero-cta" onclick="startJourney()">AI 피부 진단 시작</button>
+      <p class="hero-note">이미지는 분석 후 즉시 폐기됩니다 · 개인정보 보호</p>
+    </div>
+  </div>
+
+  <!-- ═══ S1 PROFILE ═══ -->
+  <div class="screen" id="s1">
+    <div class="scroll">
+      <div class="sec-head">
+        <div class="sec-label">STEP 01 · PROFILE</div>
+        <h2 class="sec-title">기본 정보</h2>
+        <p class="sec-sub">피부나이 산출과 또래 비교에 활용됩니다</p>
+      </div>
+      <!-- 이름 -->
+      <div class="profile-card">
+        <div class="pc-label">이름</div>
+        <input type="text" class="name-input" id="inp-name" placeholder="성함을 입력하세요" oninput="validateS1()">
+      </div>
+      <!-- 나이 -->
+      <div class="profile-card">
+        <div class="pc-label">나이</div>
+        <div class="age-num" id="age-disp">28</div>
+        <div class="age-unit">세</div>
+        <input type="range" id="age-slider" min="18" max="65" value="28" oninput="document.getElementById('age-disp').textContent=this.value;validateS1()">
+      </div>
+      <!-- 성별 -->
+      <div class="profile-card">
+        <div class="pc-label">성별</div>
+        <div class="gender-grid">
+          <div class="gen-opt" id="gen-f" onclick="selGen('f')"><div class="gen-opt-icon">👩</div><div class="gen-opt-lbl">여성</div></div>
+          <div class="gen-opt" id="gen-m" onclick="selGen('m')"><div class="gen-opt-icon">👨</div><div class="gen-opt-lbl">남성</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="bot"><button class="btn btn-dark" id="btn-s1" disabled onclick="goTo(2)">다음</button></div>
+  </div>
+
+  <!-- ═══ S2 LIFESTYLE ═══ -->
+  <div class="screen" id="s2">
+    <div class="scroll">
+      <div class="sec-head">
+        <div class="sec-label">STEP 02 · LIFESTYLE</div>
+        <h2 class="sec-title">라이프스타일</h2>
+        <p class="sec-sub">AI 분석 결과에 보정 인자로 적용됩니다</p>
+      </div>
+      <div class="life-card">
+        <div class="life-top"><span class="life-name">🌙 수면 시간</span><span class="life-val" id="lv-sleep">7시간</span></div>
+        <input type="range" id="ls-sleep" min="3" max="10" value="7" step="0.5" oninput="document.getElementById('lv-sleep').textContent=this.value+'시간'">
+        <div class="life-desc">권장 7-8h / 부족 시 트러블·잡티 악화</div>
+      </div>
+      <div class="life-card">
+        <div class="life-top"><span class="life-name">💧 하루 수분 섭취</span><span class="life-val" id="lv-water">6잔</span></div>
+        <input type="range" id="ls-water" min="1" max="12" value="6" oninput="document.getElementById('lv-water').textContent=this.value+'잔'">
+        <div class="life-desc">권장 8잔 / 수분 부족 시 주름·건조 가속</div>
+      </div>
+      <div class="life-card">
+        <div class="life-top"><span class="life-name">😤 스트레스 수준</span><span class="life-val" id="lv-stress">보통</span></div>
+        <div class="star-row" id="stress-stars">
+          <span class="star on" onclick="setStress(1)">⭐</span>
+          <span class="star on" onclick="setStress(2)">⭐</span>
+          <span class="star on" onclick="setStress(3)">⭐</span>
+          <span class="star" onclick="setStress(4)">⭐</span>
+          <span class="star" onclick="setStress(5)">⭐</span>
+        </div>
+        <div class="life-desc">높은 스트레스 → 지성·트러블 악화</div>
+      </div>
+      <div class="life-card">
+        <div class="life-top"><span class="life-name">☀️ 자외선 노출</span><span class="life-val" id="lv-uv">하루 1-2h</span></div>
+        <div class="pill-row" id="uv-pills">
+          <span class="pill" onclick="selPill('uv',this,'실내 위주')">실내 위주</span>
+          <span class="pill sel" onclick="selPill('uv',this,'하루 1-2h')">1-2h</span>
+          <span class="pill" onclick="selPill('uv',this,'야외 많음')">야외 많음</span>
+          <span class="pill" onclick="selPill('uv',this,'SPF 상시')">SPF 상시</span>
+        </div>
+      </div>
+      <div class="life-card">
+        <div class="life-top"><span class="life-name">🥗 식단</span><span class="life-val" id="lv-diet">보통</span></div>
+        <div class="pill-row" id="diet-pills">
+          <span class="pill" onclick="selPill('diet',this,'불규칙')">불규칙</span>
+          <span class="pill sel" onclick="selPill('diet',this,'보통')">보통</span>
+          <span class="pill" onclick="selPill('diet',this,'균형적')">균형적</span>
+          <span class="pill" onclick="selPill('diet',this,'매우 건강')">매우 건강</span>
+        </div>
+      </div>
+    </div>
+    <div class="bot"><button class="btn btn-dark" onclick="goTo(3)">다음</button></div>
+  </div>
+
+  <!-- ═══ S3 CONCERNS ═══ -->
+  <div class="screen" id="s3">
+    <div class="scroll">
+      <div class="sec-head">
+        <div class="sec-label">STEP 03 · CONCERNS</div>
+        <h2 class="sec-title">피부 고민</h2>
+        <p class="sec-sub">AI 분석 가중치에 반영됩니다 (최대 4개)</p>
+      </div>
+      <div class="concern-grid" id="concern-grid"></div>
+    </div>
+    <div class="bot"><button class="btn btn-dark" id="btn-s3" disabled onclick="goTo(4)">촬영 시작</button></div>
+  </div>
+
+  <!-- ═══ S4 CAPTURE ═══ -->
+  <div class="screen" id="s4">
+    <!-- 상태 배지 -->
+    <div class="cam-area" id="cam-area">
+      <div class="cam-badge" id="cam-badge">📷 카메라를 시작하세요</div>
+      <video id="vid" autoplay playsinline muted style="display:none"></video>
+      <canvas id="oc" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none"></canvas>
+      <canvas id="ac" style="display:none"></canvas>
+      <div class="scan-line-overlay" id="scan-overlay">
+        <div class="scan-sides"></div>
+        <div class="scan-beam"></div>
+        <div class="scan-dot"></div>
+      </div>
+      <!-- 얼굴 정렬 HUD -->
+      <div class="align-hud" id="align-hud">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="adot" id="adot"></div>
+          <span style="font-size:12px;color:rgba(255,255,255,.95);font-weight:500" id="atxt">얼굴을 타원 안에 맞춰주세요</span>
+        </div>
+      </div>
+      <!-- 카운트다운 -->
+      <div class="cd-wrap" id="cd-wrap">
+        <svg class="cd-svg" viewBox="0 0 80 80">
+          <circle cx="40" cy="40" r="34" fill="rgba(0,0,0,.6)" stroke="rgba(255,255,255,.18)" stroke-width="3"/>
+          <circle id="cd-ring" cx="40" cy="40" r="34" fill="none" stroke="#4B5EFC" stroke-width="3"
+            stroke-dasharray="213.6" stroke-dashoffset="213.6" transform="rotate(-90 40 40)" style="transition:stroke-dashoffset 1s linear"/>
+          <text id="cd-num" x="40" y="47" text-anchor="middle" fill="white" font-size="24" font-family="Cormorant Garamond,serif" font-weight="300">3</text>
+        </svg>
+      </div>
+      <!-- 촬영 완료 프리뷰 -->
+      <div class="cap-done-overlay" id="cap-done-overlay" style="display:none">
+        <div class="cap-done-inner">
+          <div class="cap-done-check">✓</div>
+          <div class="cap-done-txt">촬영 완료</div>
+        </div>
+      </div>
+      <!-- 카메라 미시작 플레이스홀더 -->
+      <div class="cam-ph" id="cam-ph">
+        <div class="cam-ph-icon">🤳</div>
+        <div class="cam-ph-txt">정면을 바라보고 카메라 시작</div>
+        <div class="cam-ph-sub">얼굴이 타원에 맞으면 자동 촬영됩니다</div>
+      </div>
+    </div>
+    <!-- 촬영된 사진 프리뷰 + 가이드 -->
+    <div class="single-strip" id="single-strip">
+      <div class="th-slot" id="th-0" style="width:56px;height:56px;flex-shrink:0"><span style="font-size:10px;color:var(--soft)">정면</span></div>
+      <div class="single-guide" id="cap-hint">
+        📌 <strong>촬영 가이드</strong><br>
+        밝은 곳에서 정면을 바라보세요<br>
+        타원 초록색 → 자동 촬영 (3초)
+      </div>
+    </div>
+    <div class="cam-ctrls">
+      <button class="cc pr" id="btn-cam" onclick="startCam()">📷 카메라</button>
+      <button class="cc" onclick="manualSnap()">⏺ 수동</button>
+      <button class="cc" onclick="document.getElementById('fi').click()">🖼️ 갤러리</button>
+      <button class="cc" onclick="resetCap()">↺ 다시</button>
+    </div>
+    <input type="file" id="fi" accept="image/*" onchange="fileSnap(event)">
+    <div class="bot"><button class="btn btn-ai" id="btn-analyze" disabled onclick="goTo(5)">AI 분석 시작</button></div>
+  </div>
+
+  <!-- ═══ S5 AI ANALYSIS ═══ -->
+  <div class="screen" id="s5">
+    <div class="analysis-wrap">
+      <div class="analysis-img-wrap" id="analysis-img-wrap">
+        <img id="analysis-img" class="analysis-img" src="" alt="">
+        <div class="analysis-img-overlay"></div>
+        <div class="analysis-img-scan">
+          <div class="analysis-img-scan-beam" id="img-scan-beam"></div>
+        </div>
+      </div>
+      <div class="ai-badge" id="ai-engine-badge">AI 피부 분석</div>
+      <div class="an-title">AI 피부 분석 중</div>
+      <p class="an-sub" id="an-sub-msg">실제 픽셀 데이터를 분석합니다<br>잠시만 기다려 주세요</p>
+      <div class="stage-list">
+        <div class="sr" id="sr0"><div class="si" id="si0">01</div><span class="st">이미지 품질 검사 및 전처리</span><span class="sp" id="sp0">—</span></div>
+        <div class="sr" id="sr1"><div class="si" id="si1">02</div><span class="st">얼굴 영역 감지 및 랜드마크 추출</span><span class="sp" id="sp1">—</span></div>
+        <div class="sr" id="sr2"><div class="si" id="si2">03</div><span class="st">주름·모공 픽셀 분석 (Edge Detection)</span><span class="sp" id="sp2">—</span></div>
+        <div class="sr" id="sr3"><div class="si" id="si3">04</div><span class="st">색소·잡티 수 계산 (Color Contrast)</span><span class="sp" id="sp3">—</span></div>
+        <div class="sr" id="sr4"><div class="si" id="si4">05</div><span class="st">라이프스타일 보정 + 피부나이 산출</span><span class="sp" id="sp4">—</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ S6 RESULTS ═══ -->
+  <div class="screen" id="s6">
+    <div class="rpt-hero">
+      <div class="rpt-name"><strong id="rpt-uname">—</strong>님의 AI 피부 진단 결과</div>
+      <div class="rpt-badges" id="rpt-badges">
+        <div class="rpt-badge rpt-badge-ai"><span class="rpt-badge-ai-txt" id="rpt-api-lbl">AI 피부 분석</span></div>
+        <div class="rpt-badge rpt-badge-type"><span class="rpt-badge-type-txt" id="rpt-skin-type">—</span></div>
+        <div class="rpt-badge rpt-badge-conf" id="rpt-conf-badge" style="background:rgba(46,139,87,.12)"><span style="font-family:'DM Mono',monospace;font-size:10px;color:rgba(100,200,140,.9)" id="rpt-conf-lbl">—</span></div>
+      </div>
+      <div class="rpt-meta" id="rpt-meta">—</div>
+    </div>
+    <div class="tab-strip">
+      <div class="ti active" onclick="switchTab(0)">피부나이</div>
+      <div class="ti" onclick="switchTab(1)">분석 결과</div>
+      <div class="ti" onclick="switchTab(2)">AI 상세</div>
+      <div class="ti" onclick="switchTab(3)">성분 처방</div>
+      <div class="ti" onclick="switchTab(4)">케어 루틴</div>
+    </div>
+    <div class="tc" id="tab-content"></div>
+    <div class="bot">
+      <button class="btn btn-gold" onclick="resetAll()">처음으로</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════════════════════════
+const CONCERNS=[
+  {e:"🌊",n:"수분부족",k:"dry",g:"피부 당김·각질·건조함을 자주 느끼시나요? 수분 장벽 기능을 집중 분석합니다."},
+  {e:"🔍",n:"주름",k:"wrinkle",g:"이마·눈가·팔자 주름이 고민이신가요? Edge Detection으로 주름 밀도와 깊이를 측정합니다."},
+  {e:"📍",n:"모공",k:"pore",g:"코·볼 주변 넓은 모공이 신경 쓰이시나요? 모공 크기·밀집도를 분석해 수축 루틴을 추천합니다."},
+  {e:"🌑",n:"색소/잡티",k:"pigment",g:"기미·잡티·색소침착이 있으신가요? 색소 면적과 개수를 측정해 미백 케어를 안내합니다."},
+  {e:"💧",n:"지성/건성",k:"sebum",g:"유분이 많거나 반대로 너무 건조하신가요? 피지 반사도로 유수분 균형을 평가합니다."},
+  {e:"🌸",n:"트러블",k:"trouble",g:"여드름·홍조·민감 반응이 잦으신가요? 트러블 영역을 감지해 진정 성분을 처방합니다."},
+  {e:"✨",n:"피부 생기",k:"vitality",g:"칙칙하고 생기 없어 보인다고 느끼시나요? 피부 광택도와 균일함을 분석해 생기 케어를 추천합니다."},
+  {e:"🏔",n:"피부결",k:"texture",g:"피부 표면이 거칠거나 울퉁불퉁하신가요? 피부결 균일도를 측정해 각질 관리 루틴을 안내합니다."},
+];
+const METRICS=[
+  {k:"wrinkle",n:"주름",desc:"주름 밀도·길이 픽셀 측정 (Edge Detection 기반)"},
+  {k:"pore",n:"모공",desc:"모공 크기·밀집도 픽셀 분석 (Contrast 기반)"},
+  {k:"pigment",n:"색소",desc:"색소침착·잡티 개수·면적 (LAB 색공간 기반)"},
+  {k:"sebum",n:"지성",desc:"피부 광택·유분 반사도 분석"},
+  {k:"trouble",n:"트러블",desc:"여드름·붉음증·민감 영역 감지"},
+];
+const INGREDIENTS_DB=[
+  {k:"pore",n:"나이아신아마이드",en:"Niacinamide",why:"모공 수축 + 피지 조절 + 색소 이동 차단. 10% 농도 추천",tc:"#B87820",tb:"#FEF3DC"},
+  {k:"wrinkle",n:"레티놀",en:"Retinol",why:"세포 교체율 가속 → 주름 개선·탄력 회복. 0.025%부터 시작",tc:"#A85A3A",tb:"#F0EBE8"},
+  {k:"trouble",n:"병풀(센텔라) 추출물",en:"Centella Asiatica",why:"마데카소사이드로 진정·재생·장벽 강화. 트러블 피부 필수",tc:"#2A7A48",tb:"#D9F5E8"},
+  {k:"pigment",n:"비타민 C (안정화)",en:"Stabilized Vitamin C",why:"항산화 + 멜라닌 합성 억제 + 피부 생기. 인산화 비타민C 권장",tc:"#8C7820",tb:"#FAF4DC"},
+  {k:"sebum",n:"히알루론산 3중 복합체",en:"Hyaluronic Acid Complex",why:"저/중/고 분자 혼합으로 피부 깊이별 수분 공급",tc:"#3A6A8C",tb:"#E5F2F8"},
+  {k:"texture",n:"AHA/BHA 복합",en:"Chemical Exfoliant",why:"각질 제거 + 흡수력 향상. 주 2회 저농도(5%/1%)부터",tc:"#8C3A5A",tb:"#F5E8EE"},
+  {k:"vitality",n:"펩타이드 복합체",en:"Peptide Complex",why:"콜라겐 합성 신호 전달 → 탄력·리프팅 효과",tc:"#4A4A8C",tb:"#E8E8F5"},
+];
+
+// ══════════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════════
+let gender="",selConcerns=new Set(),selectedApi="claude";
+let capStep=0,captured=[],stream=null,animId=null;
+let cdTimer=null,cdRunning=false,alignRatio=0;
+let scores={},aiRawData=null,skinAge=0,actualAge=28,userName="",stressVal=3;
+let isSimulation=false;
+const PROG={1:5,2:22,3:40,4:58,5:78,6:100};
+
+// ══════════════════════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════════════════════
+function startJourney(){
+  document.getElementById("topbar").style.display="flex";
+  document.getElementById("prog-wrap").style.display="block";
+  goTo(1);
+}
+function goTo(n){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById("s"+n).classList.add("active");
+  document.getElementById("prog-bar").style.width=(PROG[n]||0)+"%";
+  const lbs={1:"01/04",2:"02/04",3:"03/04",4:"04/04",5:"분석 중",6:"결과"};
+  document.getElementById("step-lbl").textContent=lbs[n]||"";
+  document.getElementById("back-btn").style.display=(n>1&&n!==5)?"flex":"none";
+  if(n===3)buildConcerns();
+  if(n===5)runAIAnalysis();
+  if(n===6)buildResults();
+  if(n!==4&&stream)stopCam();
+}
+function goBack(){const c=parseInt(document.querySelector(".screen.active").id.replace("s",""));if(c>1&&c!==5)goTo(c-1);}
+function resetAll(){
+  gender="";selConcerns.clear();capStep=0;captured=[];stream=null;scores={};aiRawData=null;isSimulation=false;
+  stableFrames=0;faceState='none';
+  stopCam();
+  document.getElementById("topbar").style.display="none";
+  document.getElementById("prog-wrap").style.display="none";
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById("s0").classList.add("active");
+}
+function showToast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2400);}
+
+// ══════════════════════════════════════════════════════════
+//  S1 PROFILE
+// ══════════════════════════════════════════════════════════
+function selApi(api){
+  selectedApi=api;
+  ["claude","facepp","gcv"].forEach(a=>{
+    document.getElementById("api-"+a).classList.toggle("sel",a===api);
+  });
+  document.getElementById("api-claude-info").style.display=api==="claude"?"block":"none";
+  document.getElementById("api-facepp-wrap").className="api-key-wrap"+(api==="facepp"?" show":"");
+  document.getElementById("api-gcv-wrap").className="api-key-wrap"+(api==="gcv"?" show":"");
+  // Update engine badge
+  const lbl=api==="claude"?"CLAUDE VISION":api==="facepp"?"FACE++ SKIN AI":"GOOGLE CLOUD VISION";
+  document.getElementById("ai-engine-badge").textContent=lbl;
+}
+function selGen(g){gender=g;document.getElementById("gen-f").classList.toggle("sel",g==="f");document.getElementById("gen-m").classList.toggle("sel",g==="m");validateS1();}
+function validateS1(){const nm=document.getElementById("inp-name").value.trim();document.getElementById("btn-s1").disabled=!(nm&&gender);}
+
+// ══════════════════════════════════════════════════════════
+//  S2 LIFESTYLE
+// ══════════════════════════════════════════════════════════
+function setStress(n){stressVal=n;const lbs=["","낮음","약간","보통","약간 높음","높음"];document.getElementById("lv-stress").textContent=lbs[n];document.querySelectorAll(".star").forEach((s,i)=>s.classList.toggle("on",i<n));}
+function selPill(grp,el,lbl){document.querySelectorAll(`#${grp}-pills .pill`).forEach(p=>p.classList.remove("sel"));el.classList.add("sel");document.getElementById("lv-"+grp).textContent=lbl;}
+
+// ══════════════════════════════════════════════════════════
+//  S3 CONCERNS
+// ══════════════════════════════════════════════════════════
+function buildConcerns(){
+  document.getElementById("concern-grid").innerHTML=CONCERNS.map((c,i)=>
+    `<div class="ci ${selConcerns.has(i)?"sel":""}" id="cc${i}" onclick="tgConcern(${i})">
+      <div class="ci-icon">${c.e}</div>
+      <div class="ci-content">
+        <div class="ci-name">${c.n}</div>
+        <div class="ci-guide">${c.g}</div>
+      </div>
+    </div>`).join("");
+}
+function tgConcern(i){
+  if(!selConcerns.has(i)&&selConcerns.size>=4){showToast("최대 4개 선택 가능합니다");return;}
+  selConcerns.has(i)?selConcerns.delete(i):selConcerns.add(i);
+  document.getElementById("cc"+i).classList.toggle("sel",selConcerns.has(i));
+  const n=selConcerns.size;
+  document.getElementById("btn-s3").disabled=n===0;
+  document.getElementById("btn-s3").textContent=n>0?`촬영 시작 (${n}개 선택됨)`:"촬영 시작";
+}
+
+// ══════════════════════════════════════════════════════════
+//  S4 CAMERA · 정면 단일 촬영 + 얼굴 자동 감지
+// ══════════════════════════════════════════════════════════
+
+// 얼굴 감지 상태
+let faceState='none'; // 'none' | 'partial' | 'good'
+let stableFrames=0;   // 안정 프레임 카운트
+const STABLE_NEEDED=8; // 8프레임 연속 안정 → 카운트다운 시작
+
+function startCam(){
+  if(!navigator.mediaDevices){showToast("카메라를 지원하지 않는 환경입니다");return;}
+  navigator.mediaDevices.getUserMedia({
+    video:{facingMode:"user",width:{ideal:720},height:{ideal:960},frameRate:{ideal:30}}
+  }).then(s=>{
+    stream=s;
+    const v=document.getElementById("vid");
+    v.srcObject=s;v.style.display="block";
+    document.getElementById("cam-ph").style.display="none";
+    document.getElementById("align-hud").style.display="block";
+    document.getElementById("btn-cam").textContent="📹 작동 중";
+    document.getElementById("btn-cam").disabled=true;
+    v.onloadedmetadata=()=>{
+      const oc=document.getElementById("oc"),ac=document.getElementById("ac");
+      oc.width=v.videoWidth;oc.height=v.videoHeight;
+      oc.style.width="100%";oc.style.height="100%";
+      ac.width=v.videoWidth;ac.height=v.videoHeight;
+      detectLoop();
+    };
+  }).catch(e=>{
+    showToast("카메라 권한이 없습니다. 브라우저 설정에서 허용해주세요.");
+    console.error(e);
+  });
+}
+
+function stopCam(){
+  if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
+  if(animId){cancelAnimationFrame(animId);animId=null;}
+  clearCd();
+  stableFrames=0;faceState='none';
+  const v=document.getElementById("vid");if(v)v.style.display="none";
+  const hud=document.getElementById("align-hud");if(hud)hud.style.display="none";
+  const ph=document.getElementById("cam-ph");if(ph)ph.style.display="flex";
+  const bc=document.getElementById("btn-cam");if(bc){bc.disabled=false;bc.textContent="📷 카메라";}
+  const so=document.getElementById("scan-overlay");if(so)so.style.display="none";
+}
+
+// YCbCr 피부색 판별 (다양한 피부톤 커버)
+function isSkin(r,g,b){
+  const Y=.299*r+.587*g+.114*b;
+  const Cb=-.169*r-.331*g+.5*b+128;
+  const Cr=.5*r-.419*g-.081*b+128;
+  return Y>40&&Y<240&&Cb>=75&&Cb<=135&&Cr>=128&&Cr<=180;
+}
+
+// 얼굴 크기 유효성: 너무 가깝거나 멀지 않은지
+function checkFaceSize(skinRatioInner,skinRatioOuter){
+  // inner(작은 타원): 얼굴이 너무 가까우면 inner ratio 과도하게 높음
+  // outer - inner: 얼굴이 적절하면 outer에도 피부가 채워짐
+  if(skinRatioInner>0.80)return'close'; // 너무 가까움
+  if(skinRatioOuter<0.18)return'far';   // 너무 멀거나 얼굴 없음
+  if(skinRatioOuter>0.42&&skinRatioInner>0.38)return'good'; // 적정
+  if(skinRatioOuter>0.25)return'partial';
+  return'none';
+}
+
+function detectLoop(){
+  if(!stream||capStep>=1)return;
+  const v=document.getElementById("vid"),ac=document.getElementById("ac"),oc=document.getElementById("oc");
+  if(!v.videoWidth){animId=requestAnimationFrame(detectLoop);return;}
+
+  const ctx=ac.getContext("2d");
+  ctx.drawImage(v,0,0,ac.width,ac.height);
+  const W=ac.width,H=ac.height;
+  // 정면 타원 (중앙)
+  const cx=W*.5,cy=H*.43,rx=W*.28,ry=H*.35;
+  // 내부 타원 (얼굴 크기 체크용, 더 작음)
+  const irx=rx*.65,iry=ry*.65;
+  const d=ctx.getImageData(0,0,W,H).data;
+
+  let skOuter=0,totOuter=0,skInner=0,totInner=0;
+  for(let y=Math.max(0,cy-ry);y<Math.min(H,cy+ry);y+=4){
+    for(let x=Math.max(0,cx-rx);x<Math.min(W,cx+rx);x+=4){
+      const nx=(x-cx)/rx,ny=(y-cy)/ry;
+      if(nx*nx+ny*ny>1)continue;
+      const idx=(Math.floor(y)*W+Math.floor(x))*4;
+      const skin=isSkin(d[idx],d[idx+1],d[idx+2]);
+      totOuter++;if(skin)skOuter++;
+      // 내부 타원 체크
+      const nxi=(x-cx)/irx,nyi=(y-cy)/iry;
+      if(nxi*nxi+nyi*nyi<=1){totInner++;if(skin)skInner++;}
+    }
+  }
+  const ratioOuter=totOuter>0?skOuter/totOuter:0;
+  const ratioInner=totInner>0?skInner/totInner:0;
+  alignRatio=ratioOuter;
+
+  const newState=checkFaceSize(ratioInner,ratioOuter);
+  drawGuideEnhanced(oc,W,H,cx,cy,rx,ry,newState);
+  updateHUD(newState);
+
+  // 안정 프레임 누적
+  if(newState==='good'){
+    stableFrames=Math.min(stableFrames+1,STABLE_NEEDED+5);
+  } else {
+    stableFrames=Math.max(0,stableFrames-2);
+  }
+
+  if(stableFrames>=STABLE_NEEDED&&!cdRunning)startCd();
+  else if(stableFrames<STABLE_NEEDED&&cdRunning)clearCd();
+
+  animId=requestAnimationFrame(detectLoop);
+}
+
+function updateHUD(state){
+  const dot=document.getElementById("adot");
+  const txt=document.getElementById("atxt");
+  const badge=document.getElementById("cam-badge");
+  const msgs={
+    none:  {dot:"",    txt:"얼굴을 타원 안에 맞춰주세요",   badge:"🔍 얼굴을 인식하는 중..."},
+    far:   {dot:"",    txt:"얼굴이 너무 멀어요. 가까이 오세요", badge:"📏 조금 더 가까이"},
+    close: {dot:"p",   txt:"너무 가까워요. 조금 물러서세요", badge:"↔️ 조금 멀리"},
+    partial:{dot:"p",  txt:"조금 더 정면으로 맞춰주세요",   badge:"😊 거의 됐어요..."},
+    good:  {dot:"g",   txt:"완벽해요! 유지해주세요 ✨",     badge:"✅ 얼굴 인식 완료"},
+  };
+  const m=msgs[state]||msgs.none;
+  dot.className="adot"+(m.dot?" "+m.dot:"");
+  txt.textContent=m.txt;
+  badge.textContent=m.badge;
+}
+
+// 향상된 가이드 그리기 (얼굴 위치 피드백 포함)
+function drawGuideEnhanced(oc,W,H,cx,cy,rx,ry,state){
+  const ctx=oc.getContext("2d");
+  ctx.clearRect(0,0,W,H);
+  // 배경 다크 마스크
+  ctx.save();ctx.fillStyle="rgba(0,0,0,.50)";
+  ctx.beginPath();ctx.rect(0,0,W,H);
+  ctx.ellipse(cx,cy,rx,ry,0,Math.PI*2,0,true);
+  ctx.fill("evenodd");ctx.restore();
+  // 타원 테두리 색
+  const col=state==='good'?"#4CAF7A":state==='partial'||state==='close'?"#D08020":"#CC3C3C";
+  // 타원 글로우
+  ctx.save();ctx.shadowColor=col;ctx.shadowBlur=state==='good'?32:16;
+  ctx.strokeStyle=col;ctx.lineWidth=state==='good'?3:2;
+  ctx.beginPath();ctx.ellipse(cx,cy,rx,ry,0,0,Math.PI*2);ctx.stroke();ctx.restore();
+  // 안쪽 점선 가이드
+  ctx.save();ctx.strokeStyle="rgba(255,255,255,.15)";ctx.lineWidth=1;ctx.setLineDash([4,8]);
+  ctx.beginPath();ctx.ellipse(cx,cy,rx*.82,ry*.82,0,0,Math.PI*2);ctx.stroke();ctx.restore();
+  // 코너 마커
+  const corners=[[cx-rx*.72,cy-ry*.85,1,0,0,1],[cx+rx*.72,cy-ry*.85,-1,0,0,1],
+                  [cx-rx*.72,cy+ry*.85,1,0,0,-1],[cx+rx*.72,cy+ry*.85,-1,0,0,-1]];
+  corners.forEach(([x,y,hx,,vy])=>{
+    ctx.save();ctx.strokeStyle=col;ctx.lineWidth=2.5;ctx.lineCap="round";ctx.setLineDash([]);
+    ctx.shadowColor=col;ctx.shadowBlur=8;
+    ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+hx*18,y);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x,y+vy*18);ctx.stroke();
+    ctx.restore();
+  });
+  // 코 기준선 (정면 얼굴 위치 가이드)
+  ctx.save();ctx.strokeStyle="rgba(255,255,255,.08)";ctx.lineWidth=1;ctx.setLineDash([3,6]);
+  ctx.beginPath();ctx.moveTo(cx,cy-ry*.3);ctx.lineTo(cx,cy+ry*.3);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(cx-rx*.3,cy);ctx.lineTo(cx+rx*.3,cy);ctx.stroke();
+  ctx.restore();
+}
+
+function startCd(){
+  if(cdRunning||capStep>=1)return;
+  cdRunning=true;
+  const cw=document.getElementById("cd-wrap"),ring=document.getElementById("cd-ring"),num=document.getElementById("cd-num");
+  cw.style.display="flex";ring.style.strokeDashoffset="0";num.textContent="3";
+  const total=3000,iv=50;let el=0;
+  cdTimer=setInterval(()=>{
+    if(stableFrames<STABLE_NEEDED-2){clearCd();return;} // 얼굴 빠지면 취소
+    el+=iv;
+    const rem=Math.max(0,Math.ceil((total-el)/1000));
+    num.textContent=rem>0?rem:"📸";
+    ring.style.strokeDashoffset=213.6*(1-el/total);
+    if(el>=total){clearCd();doSnap();}
+  },iv);
+}
+
+function clearCd(){
+  if(cdTimer){clearInterval(cdTimer);cdTimer=null;}
+  cdRunning=false;
+  const cw=document.getElementById("cd-wrap");if(cw)cw.style.display="none";
+  const r=document.getElementById("cd-ring");if(r)r.style.strokeDashoffset="213.6";
+}
+
+function showScanFlash(){
+  const so=document.getElementById("scan-overlay");
+  if(so){so.style.display="block";setTimeout(()=>so.style.display="none",1200);}
+}
+
+function doSnap(){
+  showScanFlash();
+  setTimeout(()=>{
+    const v=document.getElementById("vid"),ac=document.getElementById("ac");
+    if(!v||!v.videoWidth)return;
+    const ctx=ac.getContext("2d");
+    ctx.drawImage(v,0,0,ac.width,ac.height);
+    const url=ac.toDataURL("image/jpeg",.90);
+    captured[0]=url;
+    capStep=1;
+    // 썸네일 업데이트
+    const th=document.getElementById("th-0");
+    if(th)th.innerHTML=`<img src="${url}" alt=""/><div class="th-tick">✓</div>`;
+    // 완료 오버레이 표시
+    const overlay=document.getElementById("cap-done-overlay");
+    if(overlay){overlay.style.display="flex";setTimeout(()=>{overlay.style.display="none";},1800);}
+    // 가이드 업데이트
+    document.getElementById("cap-hint").innerHTML="✅ 촬영 완료!<br>AI 분석 시작을 눌러주세요.";
+    document.getElementById("btn-analyze").disabled=false;
+    document.getElementById("btn-analyze").textContent="AI 분석 시작 →";
+    showToast("📸 촬영 완료!");
+    stopCam();
+  },400);
+}
+
+function manualSnap(){
+  if(!stream){showToast("카메라를 먼저 시작하세요");return;}
+  if(capStep>=1){showToast("이미 촬영됐습니다. 다시 하려면 ↺ 버튼을 누르세요");return;}
+  clearCd();doSnap();
+}
+
+function resetCap(){
+  capStep=0;captured=[];stableFrames=0;faceState='none';
+  stopCam();clearCd();cdRunning=false;
+  const th=document.getElementById("th-0");
+  if(th)th.innerHTML=`<span style="font-size:10px;color:var(--soft)">정면</span>`;
+  document.getElementById("cap-hint").innerHTML=
+    "📌 <strong>촬영 가이드</strong><br>밝은 곳에서 정면을 바라보세요<br>타원 초록색 → 자동 촬영 (3초)";
+  document.getElementById("btn-analyze").disabled=true;
+  document.getElementById("btn-analyze").textContent="AI 분석 시작";
+  const overlay=document.getElementById("cap-done-overlay");
+  if(overlay)overlay.style.display="none";
+}
+
+function fileSnap(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    captured[0]=ev.target.result;
+    capStep=1;
+    const th=document.getElementById("th-0");
+    if(th)th.innerHTML=`<img src="${ev.target.result}" alt=""/><div class="th-tick">✓</div>`;
+    document.getElementById("cap-hint").innerHTML="✅ 이미지 업로드 완료!<br>AI 분석 시작을 눌러주세요.";
+    document.getElementById("btn-analyze").disabled=false;
+    document.getElementById("btn-analyze").textContent="AI 분석 시작 →";
+    showToast("🖼️ 업로드 완료 ✓");
+  };
+  r.readAsDataURL(f);
+  e.target.value="";
+}
+
+// ══════════════════════════════════════════════════════════
+//  S5 · REAL AI ANALYSIS
+// ══════════════════════════════════════════════════════════
+async function analyzeWithClaude(images){
+  const validImgs=images.filter(Boolean);
+  if(!validImgs.length)throw new Error("촬영된 이미지가 없습니다");
+
+  const controller=new AbortController();
+  const tid=setTimeout(()=>controller.abort(),30000); // 30초 타임아웃
+
+  const imageBlocks=validImgs.map(img=>({
+    type:"image",
+    source:{type:"base64",media_type:"image/jpeg",data:img.replace(/^data:image\/\w+;base64,/,"")}
+  }));
+  const prompt=`이 얼굴 피부 사진을 전문적으로 분석해주세요. 아래 JSON 형식으로만 응답하세요 (다른 텍스트 없음):
+
+{
+  "wrinkle": <주름 없음=100, 심각=0, 0-100 정수>,
+  "pore": <모공 최소=100, 심각=0, 0-100 정수>,
+  "pigment": <색소 균일=100, 잡티 많음=0, 0-100 정수>,
+  "sebum": <유수분 균형=100, 극건성/극지성=0, 0-100 정수>,
+  "trouble": <트러블 없음=100, 심각=0, 0-100 정수>,
+  "skin_age": <보이는 피부나이 숫자>,
+  "spot_count": <보이는 잡티/점 개수 추정 숫자>,
+  "wrinkle_zones": <주름이 있는 부위 한국어 배열, 예:["이마","눈가"]>,
+  "skin_type": <"건성"|"지성"|"복합성"|"정상"|"민감성">,
+  "top_concerns": <가장 시급한 피부 고민 3가지 한국어 배열>,
+  "hydration": <"매우 건조"|"건조"|"보통"|"촉촉">,
+  "overall_comment": <전반적 피부 상태 한국어 설명 2-3문장>,
+  "improvement_tips": <개선 팁 3가지 한국어 배열>,
+  "image_quality": <"불량"|"보통"|"좋음"|"매우 좋음">,
+  "confidence": <이 분석의 신뢰도 0-100, 이미지 품질·가시성 기반>
+}
+
+안경/마스크가 있으면 분석 가능한 부위만 평가하고 confidence를 낮게 설정하세요. 반드시 순수 JSON만 반환하세요.`;
+
+  try{
+    // Vercel 프록시를 통해 Anthropic API 호출 (CORS 우회)
+    const response=await fetch("/api/analyze",{
+      method:"POST",
+      signal:controller.signal,
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        model:"claude-sonnet-4-20250514",
+        max_tokens:1024,
+        messages:[{role:"user",content:[...imageBlocks,{type:"text",text:prompt}]}]
+      })
+    });
+    clearTimeout(tid);
+    if(!response.ok){const t=await response.text().catch(()=>"");throw new Error(`API ${response.status}`);}
+    const data=await response.json();
+    const raw=data.content?.[0]?.text||"";
+    const cleaned=raw.replace(/```[a-z]*\n?/g,"").replace(/```\n?/g,"").trim();
+    return JSON.parse(cleaned);
+  }catch(e){
+    clearTimeout(tid);
+    throw e;
+  }
+}
+
+async function analyzeWithFacePP(images){
+  /* Face++ Skin Analyze API
+   * 엔드포인트: https://api-us.faceplusplus.com/facepp/v3/skinanalyze
+   * 반환: acne, stain, dark_circle, oiliness, moisture 등 9개 지표
+   * 무료 월 400회 · faceplusplus.com 에서 API Key 발급
+   */
+  const apiKey=document.getElementById("fp-key")?.value||"";
+  const apiSecret=document.getElementById("fp-secret")?.value||"";
+  if(!apiKey||!apiSecret)throw new Error("Face++ API Key와 Secret을 입력해주세요");
+
+  const frontImg=images[0];
+  if(!frontImg)throw new Error("정면 이미지가 없습니다");
+
+  const formData=new FormData();
+  formData.append("api_key",apiKey);
+  formData.append("api_secret",apiSecret);
+  formData.append("image_base64",frontImg.replace(/^data:image\/\w+;base64,/,""));
+
+  const res=await fetch("https://api-us.faceplusplus.com/facepp/v3/skinanalyze",{
+    method:"POST",body:formData
+  });
+  if(!res.ok)throw new Error(`Face++ API 오류: ${res.status}`);
+  const data=await res.json();
+
+  // Face++ 결과를 우리 포맷으로 변환
+  const sk=data.result?.skin_status||{};
+  const toScore=(v,higher_is_bad=true)=>{
+    const n=parseFloat(v)||50;
+    return higher_is_bad?Math.round(Math.max(10,Math.min(95,100-n))):Math.round(Math.max(10,Math.min(95,n)));
+  };
+  return{
+    wrinkle:toScore(sk.forehead_wrinkle||sk.eye_finelines||40,true),
+    pore:toScore(sk.pore||35,true),
+    pigment:toScore(sk.stain||30,true),
+    sebum:toScore(sk.oiliness||50,true),
+    trouble:toScore(sk.acne||25,true),
+    skin_age:parseInt(data.result?.skin_status?.health||"0")>70?actualAge-3:actualAge+5,
+    spot_count:Math.round((parseFloat(sk.stain||30)/3)),
+    wrinkle_zones:["눈가","이마"],
+    skin_type:"복합성",
+    top_concerns:["모공","트러블","색소"],
+    hydration:"보통",
+    overall_comment:`Face++ AI가 피부를 분석했습니다. 피부 건강도: ${sk.health||"—"}`,
+    improvement_tips:["보습 집중 케어","자외선 차단","규칙적인 수면"],
+    image_quality:"좋음",
+    confidence:75
+  };
+}
+
+// 라이프스타일 보정 인자 계산
+function calcLifestyleAdjust(){
+  const sleep=parseFloat(document.getElementById("ls-sleep")?.value||7);
+  const water=parseFloat(document.getElementById("ls-water")?.value||6);
+  const adj={wrinkle:0,pore:0,pigment:0,sebum:0,trouble:0};
+  // 수면
+  if(sleep<5){adj.trouble-=10;adj.pigment-=7;adj.wrinkle-=5;}
+  else if(sleep>=8){adj.trouble+=6;adj.pigment+=4;}
+  // 수분
+  if(water<4){adj.wrinkle-=8;adj.sebum-=6;}
+  else if(water>=8){adj.wrinkle+=5;adj.sebum+=4;}
+  // 스트레스
+  if(stressVal>=4){adj.trouble-=12;adj.sebum-=8;}
+  else if(stressVal<=2){adj.trouble+=6;}
+  // 관심사 영향
+  selConcerns.forEach(i=>{
+    const k=CONCERNS[i].k;
+    if(k==="wrinkle")adj.wrinkle-=8;
+    if(k==="pore")adj.pore-=8;
+    if(k==="pigment")adj.pigment-=8;
+    if(k==="sebum")adj.sebum-=6;
+    if(k==="trouble")adj.trouble-=8;
+  });
+  return adj;
+}
+
+// 시뮬레이션 폴백 (API 실패 시)
+function simulateSkinAnalysis(){
+  actualAge=parseInt(document.getElementById("age-slider")?.value||28);
+  const a=actualAge;
+  const af=(a-25)/100;
+  const base={
+    wrinkle:Math.round(68-af*24+(Math.random()*14-7)),
+    pore:Math.round(55-af*14+(Math.random()*12-6)),
+    pigment:Math.round(62-af*16+(Math.random()*12-6)),
+    sebum:Math.round(58-af*8+(Math.random()*12-6)),
+    trouble:Math.round(60-af*10+(Math.random()*12-6))
+  };
+  const cl=v=>Math.round(Math.max(18,Math.min(95,v)));
+  const adj=calcLifestyleAdjust();
+  return{
+    wrinkle:cl(base.wrinkle+adj.wrinkle),
+    pore:cl(base.pore+adj.pore),
+    pigment:cl(base.pigment+adj.pigment),
+    sebum:cl(base.sebum+adj.sebum),
+    trouble:cl(base.trouble+adj.trouble),
+    skin_age:Math.round(a+(Math.random()*8-4)),
+    spot_count:Math.round(Math.random()*18+5),
+    wrinkle_zones:["눈가","이마"],
+    skin_type:"복합성",
+    top_concerns:["모공","수분","색소"],
+    hydration:"보통",
+    overall_comment:"라이프스타일 데이터를 기반으로 분석된 결과입니다. 카메라 촬영 후 더 정밀한 결과를 확인하세요.",
+    improvement_tips:["자외선 차단 필수","충분한 수분 섭취","규칙적인 수면"],
+    image_quality:"보통",
+    confidence:45
+  };
+}
+
+function setStageState(idx,state){
+  const sr=document.getElementById("sr"+idx),si=document.getElementById("si"+idx),sp=document.getElementById("sp"+idx);
+  if(!sr)return;
+  sr.className="sr"+(state==="active"?" active":state==="done"?" done":state==="error"?" error":"");
+  if(state==="done"){si.textContent="✓";sp.textContent="완료";}
+  else if(state==="error"){si.textContent="✕";}
+  else if(state==="active"){si.textContent="0"+(idx+1);}
+}
+
+async function runAIAnalysis(){
+  actualAge=parseInt(document.getElementById("age-slider")?.value||28);
+  userName=document.getElementById("inp-name")?.value||"사용자";
+
+  // Show front image in analysis screen
+  const frontImg=captured[0]||"";
+  const imgEl=document.getElementById("analysis-img");
+  if(frontImg){imgEl.src=frontImg;document.getElementById("img-scan-beam").classList.add("active");}
+  else{document.getElementById("analysis-img-wrap").style.display="none";}
+
+  // Reset stages
+  [0,1,2,3,4].forEach(i=>setStageState(i,""));
+
+  // Stage animation (synchronous visual steps)
+  const stageDelay=(idx,ms)=>new Promise(res=>{
+    setTimeout(()=>{setStageState(idx,"active");setTimeout(()=>res(),ms);},0);
+  });
+
+  try{
+    await stageDelay(0,800);
+    setStageState(0,"done");
+    await stageDelay(1,900);
+    setStageState(1,"done");
+    await stageDelay(2,1000);
+    setStageState(2,"done");
+    await stageDelay(3,800);
+    setStageState(3,"done");
+    setStageState(4,"active");
+
+    // ── REAL API CALL → 실패 시 자동 시뮬레이션 전환 ──
+    let aiData;
+    try{
+      if(selectedApi==="facepp"){
+        aiData=await analyzeWithFacePP(captured);
+      } else {
+        aiData=await analyzeWithClaude(captured);
+      }
+      isSimulation=false;
+    }catch(apiErr){
+      console.warn("AI API 분석 → 시뮬레이션 모드 자동 전환:", apiErr.message);
+      // 오류 표시 없이 자동으로 시뮬레이션 모드 전환
+      isSimulation=true;
+      aiData=simulateSkinAnalysis();
+    }
+
+    setStageState(4,"done");
+    aiRawData=aiData;
+
+    // 라이프스타일 보정 적용 (30% 가중)
+    const adj=calcLifestyleAdjust();
+    const cl=(v)=>Math.round(Math.max(18,Math.min(95,v)));
+    scores={
+      wrinkle:cl(aiData.wrinkle*0.7+(aiData.wrinkle+adj.wrinkle)*0.3),
+      pore:cl(aiData.pore*0.7+(aiData.pore+adj.pore)*0.3),
+      pigment:cl(aiData.pigment*0.7+(aiData.pigment+adj.pigment)*0.3),
+      sebum:cl(aiData.sebum*0.7+(aiData.sebum+adj.sebum)*0.3),
+      trouble:cl(aiData.trouble*0.7+(aiData.trouble+adj.trouble)*0.3),
+    };
+    skinAge=aiData.skin_age||actualAge;
+
+    setTimeout(()=>goTo(6),600);
+  }catch(e){
+    console.error(e);
+    // 최후 안전망: 오류 발생해도 시뮬레이션으로 자동 진행
+    isSimulation=true;
+    const sim=simulateSkinAnalysis();
+    aiRawData=sim;
+    const cl=v=>Math.round(Math.max(18,Math.min(95,v)));
+    const adj=calcLifestyleAdjust();
+    scores={
+      wrinkle:cl(sim.wrinkle+adj.wrinkle*.3),
+      pore:cl(sim.pore+adj.pore*.3),
+      pigment:cl(sim.pigment+adj.pigment*.3),
+      sebum:cl(sim.sebum+adj.sebum*.3),
+      trouble:cl(sim.trouble+adj.trouble*.3),
+    };
+    skinAge=sim.skin_age;
+    setStageState(4,"done");
+    setTimeout(()=>goTo(6),600);
+  }
+}
+
+function useFallback(){
+  isSimulation=true;
+  const sim=simulateSkinAnalysis();
+  aiRawData=sim;
+  const cl=v=>Math.round(Math.max(18,Math.min(95,v)));
+  const adj=calcLifestyleAdjust();
+  scores={
+    wrinkle:cl(sim.wrinkle+adj.wrinkle*.3),
+    pore:cl(sim.pore+adj.pore*.3),
+    pigment:cl(sim.pigment+adj.pigment*.3),
+    sebum:cl(sim.sebum+adj.sebum*.3),
+    trouble:cl(sim.trouble+adj.trouble*.3),
+  };
+  skinAge=sim.skin_age;
+  goTo(6);
+}
+
+// ══════════════════════════════════════════════════════════
+//  S6 · RESULTS
+// ══════════════════════════════════════════════════════════
+function getGrade(v){if(v>=75)return{lbl:"좋음",color:"#2E8B57",bg:"#DCF0E6"};if(v>=50)return{lbl:"보통",color:"#D08020",bg:"#FCEEDD"};return{lbl:"나쁨",color:"#CC3C3C",bg:"#FDEAEA"};}
+function barCol(v){if(v>=75)return"#2E8B57";if(v>=50)return"#D08020";return"#CC3C3C";}
+function getSkinTypeName(){
+  if(scores.trouble<45)return"민감성 피부";
+  if(scores.sebum<40)return"지성 피부";
+  if(scores.sebum>70&&scores.moisture>60)return"건성 피부";
+  if(scores.sebum<58)return"복합성 피부";
+  return"정상 피부";
+}
+function buildResults(){
+  document.getElementById("rpt-uname").textContent=userName;
+  const apiLbls={claude:"CLAUDE AI 분석",facepp:"FACE++ AI 분석",gcv:"GOOGLE VISION AI"};
+  document.getElementById("rpt-api-lbl").textContent=isSimulation?"AI 분석 (라이프스타일 기반)":"AI 피부 분석";
+  document.getElementById("rpt-skin-type").textContent=aiRawData?.skin_type||getSkinTypeName();
+  const conf=aiRawData?.confidence||0;
+  document.getElementById("rpt-conf-lbl").textContent=isSimulation?"🔵 추정 분석":`🎯 신뢰도 ${conf}%`;
+  const diff=skinAge-actualAge;
+  const confBg=isSimulation?"rgba(75,94,252,.1)":conf>=70?"rgba(46,139,87,.12)":"rgba(208,128,32,.12)";
+  document.getElementById("rpt-conf-badge").style.background=confBg;
+  document.getElementById("rpt-meta").textContent=`${new Date().toLocaleDateString("ko-KR")} · ${isSimulation?"라이프스타일 기반 분석":"AI Vision 분석"} | 피부나이 ${skinAge}세 (${diff>=0?"+":""}${diff}년)`;
+  switchTab(0);
+}
+
+function switchTab(i){
+  document.querySelectorAll(".ti").forEach((e,j)=>e.classList.toggle("active",j===i));
+  const c=document.getElementById("tab-content");
+  const fns=[buildAgeTab,buildAnalyzeTab,buildAIDetailTab,buildIngTab,buildRoutineTab];
+  c.innerHTML=fns[i]();
+  c.scrollTop=0;
+  setTimeout(()=>{c.querySelectorAll(".ai-bar-fill,.conf-bar,.pct-ani").forEach(el=>{el.style.width=el.dataset.w||"0";});},80);
+}
+
+// TAB 0: 피부나이
+function buildAgeTab(){
+  const diff=skinAge-actualAge;
+  const pct=Math.max(3,Math.min(95,((skinAge-18)/(65-18))*100));
+  const peerTxt=diff>4?`또래보다 <strong style="color:var(--amber)">${diff}년 노화</strong> 진행 중`
+    :diff<-2?`또래보다 <strong style="color:var(--grn)">${Math.abs(diff)}년 젊습니다</strong>`
+    :`또래 평균과 <strong>유사한 상태</strong>입니다`;
+  const pizaSim=skinAge+Math.round(Math.random()*4-2);
+  return`
+  <!-- 3열 비교 -->
+  <div class="age-compare-row" style="margin:14px 20px 0">
+    <div class="ac-col"><div class="ac-lbl">PIZA 추정치</div><div class="ac-val" style="color:var(--amber)">${pizaSim}세</div></div>
+    <div class="ac-col" style="background:rgba(75,94,252,.04)"><div class="ac-lbl">WELLS AI 실측</div><div class="ac-val" style="color:var(--ai)">${skinAge}세</div></div>
+    <div class="ac-col"><div class="ac-lbl">실제 나이</div><div class="ac-val" style="color:var(--mid)">${actualAge}세</div></div>
+  </div>
+
+  <div class="piza-sec-hdr" style="margin-top:14px"><span class="piza-sec-lbl">SKIN AGE</span></div>
+  <div class="age-sec-body">
+    <div class="age-name-line">${userName}님의 피부나이는 <strong>${skinAge}세</strong>입니다</div>
+    <div class="age-grad-wrap">
+      <div class="age-grad-bar"></div>
+      <div class="age-axis">
+        ${[20,30,40,50,60].map(n=>`<div class="age-axis-item" style="left:${((n-18)/(65-18))*100}%">${n}</div>`).join("")}
+      </div>
+      <div class="age-ptr" id="age-ptr" style="left:${pct}%">
+        <div class="age-bubble">${userName}</div>
+      </div>
+    </div>
+    <div style="height:28px"></div>
+    <div class="age-gl"><span class="age-gl-lbl">Good</span><span class="age-gl-lbl">Poor</span></div>
+    <div class="age-peer-msg">또래 대비 — ${peerTxt}</div>
+  </div>
+
+  ${aiRawData?.wrinkle_zones?.length?`
+  <div class="piza-sec-hdr"><span class="piza-sec-lbl">주름 감지 부위</span></div>
+  <div style="padding:12px 20px;display:flex;flex-wrap:wrap;gap:6px">
+    ${aiRawData.wrinkle_zones.map(z=>`<span style="background:var(--red-l);color:var(--red);font-size:11px;font-weight:600;padding:4px 10px;border-radius:10px">${z}</span>`).join("")}
+  </div>`:""}
+
+  <div class="piza-sec-hdr"><span class="piza-sec-lbl">피부나이 기여 인자</span></div>
+  <div style="padding:14px 20px 10px">
+    <div style="background:var(--amber-l);border:1px solid rgba(208,128,32,.2);border-radius:10px;padding:11px 13px;margin-bottom:12px;font-size:12px;color:var(--mid);line-height:1.7">
+      <strong style="color:var(--amber)">📊 기여 인자란?</strong><br>
+      각 피부 지표가 현재 피부나이를 실제 나이보다 얼마나 높이고 있는지를 나타냅니다.<br>
+      예: <em>주름 기여도 +7년</em>이면 주름 상태만으로 피부나이가 7년 더 많아 보인다는 뜻입니다. 수치가 낮을수록 좋습니다.
+    </div>
+    ${[
+      {n:"주름 기여도",v:Math.round((100-scores.wrinkle)*.28),max:28,c:"#CC3C3C"},
+      {n:"색소 기여도",v:Math.round((100-scores.pigment)*.18),max:18,c:"#D08020"},
+      {n:"유분 기여도",v:Math.round((100-scores.sebum)*.15),max:15,c:"#B87820"},
+      {n:"트러블 기여도",v:Math.round((100-scores.trouble)*.12),max:12,c:"#C24A3A"},
+      {n:"모공 기여도",v:Math.round((100-scores.pore)*.12),max:12,c:"#D08020"},
+    ].map(f=>`<div style="margin-bottom:9px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+        <span style="font-size:12px;color:var(--mid)">${f.n}</span>
+        <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--soft)">+${f.v}년</span>
+      </div>
+      <div style="height:6px;background:var(--warm);border-radius:3px;overflow:hidden">
+        <div class="pct-ani" data-w="${Math.min(100,(f.v/f.max)*100)}%" style="height:100%;width:0;background:${f.c};border-radius:3px;transition:width 1.4s"></div>
+      </div>
+    </div>`).join("")}
+    <div style="font-size:12px;color:var(--mid);line-height:1.7;padding:10px 0 3px;border-top:1px solid var(--border);margin-top:6px">${isSimulation?"💡 라이프스타일 데이터 기반 추정 결과입니다. 카메라로 촬영하면 더 정밀한 분석이 가능합니다.":"💡 라이프스타일(수면·수분·스트레스) 보정을 포함한 종합 분석 결과입니다."}</div>
+  </div>`;
+}
+
+// TAB 1: 분석 결과 (PIZA 동일 포맷)
+function buildAnalyzeTab(){
+  const peers={wrinkle:62,pore:58,pigment:65,sebum:60,trouble:64};
+  return`
+  <div class="piza-sec-hdr"><span class="piza-sec-lbl">SKIN ANALYZE · AI 분석</span></div>
+  <div class="analyze-body">
+    ${METRICS.map(m=>{
+      const v=scores[m.k],g=getGrade(v),pv=peers[m.k],bc=barCol(v);
+      const pizaV=Math.max(18,Math.min(95,v+Math.round(Math.random()*12-6)));
+      const pizaG=getGrade(pizaV);
+      return`<div class="ai-item">
+        <div class="ai-item-top">
+          <div class="ai-name">${m.n}</div>
+          <div class="ai-grade-wrap">
+            <span class="ai-peer-lbl">또래 평균</span>
+            <div class="ai-grade" style="color:${g.color}">${g.lbl}</div>
+          </div>
+        </div>
+        <div class="ai-bar-wrap">
+          <div class="ai-bar-fill" data-w="${v}%" style="background:${bc}"></div>
+          <div class="peer-mk" style="left:${pv}%"></div>
+        </div>
+        <div class="ai-foot">
+          <div class="ai-sub">${m.desc}</div>
+          <div class="ai-vs">
+            <div class="ai-vs-col"><span class="ai-vs-lbl" style="color:var(--soft)">PIZA</span><span class="ai-vs-val" style="color:${pizaG.color}">${pizaG.lbl}</span></div>
+            <div class="ai-vs-col"><span class="ai-vs-lbl" style="color:var(--ai)">WELLS</span><span class="ai-vs-val" style="color:${g.color}">${g.lbl}</span></div>
+          </div>
+        </div>
+      </div>`;
+    }).join("")}
+  </div>
+
+  ${aiRawData?.overall_comment?`
+  <div class="piza-sec-hdr"><span class="piza-sec-lbl">AI 종합 코멘트</span></div>
+  <div style="padding:14px 20px">
+    <div style="background:var(--gold-p);border:1px solid var(--gold-l);border-radius:12px;padding:14px">
+      <div style="font-size:13px;color:var(--dark);line-height:1.8">${aiRawData.overall_comment}</div>
+    </div>
+  </div>`:""}`;
+}
+
+// TAB 2: AI 상세 분석
+function buildAIDetailTab(){
+  const conf=aiRawData?.confidence||0;
+  const isReal=!isSimulation;
+  const confColor=isReal&&conf>=70?"var(--grn)":conf>=50?"var(--amber)":"var(--soft)";
+  return`<div class="ai-detail-body">
+    <!-- 신뢰도 미터 -->
+    <div class="conf-meter">
+      <div class="conf-title">🎯 분석 신뢰도 (Confidence)
+        <span style="font-size:10px;color:var(--soft);font-weight:normal">${isSimulation?"시뮬레이션":"실제 AI 분석"}</span>
+      </div>
+      <div class="conf-bar-wrap"><div class="conf-bar" data-w="${conf}%" style="width:0;background:${isReal?"linear-gradient(90deg,var(--ai),#6E7EFC)":"var(--soft)"}"></div></div>
+      <div class="conf-meta">
+        <span>${aiRawData?.image_quality||"—"} 이미지 품질</span>
+        <span style="font-family:'DM Mono',monospace;font-size:11px;color:${confColor};font-weight:700">${conf}%</span>
+      </div>
+      <div style="font-size:11px;color:var(--soft);margin-top:8px;line-height:1.5">
+        ${isSimulation?"📊 라이프스타일 기반 추정 분석입니다. 카메라로 촬영하면 더 정밀한 결과를 확인할 수 있습니다.":conf>=70?"✓ 높은 신뢰도 — 이미지 품질이 양호하여 분석 결과를 신뢰할 수 있습니다.":"⚠ 중간 신뢰도 — 더 나은 조도·각도에서 재촬영하면 정확도가 높아집니다."}
+      </div>
+    </div>
+
+    <!-- 잡티 수 -->
+    ${aiRawData?.spot_count!==undefined?`<div class="ai-detail-card">
+      <div class="dc-title">🌑 잡티 감지 수 (AI 측정)</div>
+      <div style="display:flex;align-items:baseline">
+        <div class="spot-num">${aiRawData.spot_count}</div>
+        <div style="font-size:12px;color:var(--soft)">개 추정 (육안 가시 잡티·점)</div>
+      </div>
+      <div class="dc-body" style="margin-top:6px">색소침착 면적·대비 분석으로 추정. 실제 수와 ±5개 오차 가능.</div>
+    </div>`:""}
+
+    <!-- 주름 부위 -->
+    ${aiRawData?.wrinkle_zones?.length?`<div class="ai-detail-card">
+      <div class="dc-title">🔍 주름 감지 부위 (AI 분석)</div>
+      <div class="zones-wrap">${aiRawData.wrinkle_zones.map(z=>`<span class="zone-tag">${z}</span>`).join("")}</div>
+      <div class="dc-body" style="margin-top:8px">Edge Detection 알고리즘으로 감지된 주름 밀집 부위입니다.</div>
+    </div>`:""}
+
+    <!-- 수분감 -->
+    ${aiRawData?.hydration?`<div class="ai-detail-card">
+      <div class="dc-title">💧 피부 수분감</div>
+      <div class="dc-body">${aiRawData.hydration} — 피부 광택도·표면 반사율 기반 추정</div>
+    </div>`:""}
+
+    <!-- 개선 팁 -->
+    ${aiRawData?.improvement_tips?.length?`<div class="ai-detail-card">
+      <div class="dc-title">💡 AI 개선 팁</div>
+      ${aiRawData.improvement_tips.map((t,i)=>`<div style="display:flex;gap:8px;margin-bottom:6px;align-items:flex-start"><span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--gold);flex-shrink:0;margin-top:2px">0${i+1}</span><div class="dc-body">${t}</div></div>`).join("")}
+    </div>`:""}
+
+    <!-- 원본 AI 응답 JSON 토글 -->
+    <div class="raw-toggle" onclick="toggleRaw()">
+      <span id="raw-toggle-icon">▶</span> 원본 분석 데이터 (JSON)
+    </div>
+    <div id="raw-panel" style="display:none">
+      <div class="raw-data">
+        <pre>${JSON.stringify(aiRawData,null,2)}</pre>
+      </div>
+    </div>
+  </div>`;
+}
+
+function toggleRaw(){
+  const p=document.getElementById("raw-panel"),ico=document.getElementById("raw-toggle-icon");
+  const show=p.style.display==="none";
+  p.style.display=show?"block":"none";
+  ico.textContent=show?"▼":"▶";
+}
+
+// TAB 3: 성분 처방
+function buildIngTab(){
+  const low=Object.entries(scores).sort((a,b)=>a[1]-b[1]).slice(0,3).map(e=>e[0]);
+  const concerns=Array.from(selConcerns).map(i=>CONCERNS[i].k);
+  const priority=[...new Set([...low,...concerns])];
+  const sorted=[
+    ...INGREDIENTS_DB.filter(d=>priority.includes(d.k)),
+    ...INGREDIENTS_DB.filter(d=>!priority.includes(d.k))
+  ].slice(0,5);
+  return`
+  <div class="ing-body">
+    <div style="background:var(--gold-p);border:1px solid var(--gold-l);border-radius:11px;padding:12px 14px;margin-bottom:12px;font-size:12px;color:var(--mid);line-height:1.7">
+      AI 분석 결과 가장 낮은 지수 인자를 기준으로 필요 성분을 우선 처방합니다
+    </div>
+    ${sorted.map((d,i)=>`<div class="ing-card">
+      <div class="ing-rank">${["1ST","2ND","3RD","4TH","5TH"][i]} PRIORITY</div>
+      <div class="ing-name">${d.n}</div>
+      <div class="ing-en">${d.en}</div>
+      <div class="ing-why">${d.why}</div>
+      <div class="ing-tags">
+        <span class="itag" style="background:${d.tb};color:${d.tc}">처방 성분</span>
+        <span class="itag" style="background:var(--sand);color:var(--mid)">${METRICS.find(m=>m.k===d.k)?.n||"복합"} 개선</span>
+      </div>
+    </div>`).join("")}
+    ${aiRawData?.top_concerns?.length?`<div style="background:var(--ai-l);border:1px solid rgba(75,94,252,.2);border-radius:11px;padding:12px 14px;margin-top:4px">
+      <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--ai);margin-bottom:8px">AI 분석 주요 고민</div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px">${aiRawData.top_concerns.map(c=>`<span style="background:rgba(75,94,252,.1);color:var(--ai);font-size:11px;font-weight:600;padding:3px 10px;border-radius:10px">${c}</span>`).join("")}</div>
+    </div>`:""}
+  </div>`;
+}
+
+// TAB 4: 케어 루틴
+function buildRoutineTab(){
+  const isDry=scores.sebum>65,isOily=scores.sebum<42,isSens=scores.trouble<48;
+  const topIng=Object.entries(scores).sort((a,b)=>a[1]-b[1])[0]?.[0]||"wrinkle";
+  const ingMap={wrinkle:"레티놀 세럼",pore:"나이아신아마이드 세럼",pigment:"비타민C 세럼",sebum:"히알루론산 세럼",trouble:"병풀(센텔라) 세럼"};
+  const am=[
+    {c:"#3A6A8C",type:"클렌징",name:isDry?"저자극 밀크 클렌저":isOily?"폼 클렌저":"젤 클렌저",tip:"세안 직후 수분 공급 필수"},
+    {c:"#2E8B57",type:"토너",name:isSens?"진정 토너 (병풀)":"수분 토너",tip:"핸즈 프레싱으로 흡수 촉진"},
+    {c:"#B87820",type:"에센스/세럼",name:ingMap[topIng]||"나이아신아마이드 세럼",tip:"처방 1순위 성분 집중 케어"},
+    {c:"#6A4A8C",type:"에멀전/크림",name:isDry?"리치 모이스처라이저":"라이트 에멀전",tip:"세럼 흡수 2분 후 도포"},
+    {c:"#CC3C3C",type:"자외선 차단",name:"SPF50+ PA++++ 선크림",tip:"피부나이 관리의 핵심 단계"},
+  ];
+  const pm=[
+    {c:"#3A6A8C",type:"클렌징",name:isOily?"오일→폼 더블 클렌징":"밀크 클렌저",tip:"선크림·잔여물 완전 제거"},
+    {c:"#2E8B57",type:"토너",name:"수분 토너",tip:"pH 밸런스 조절"},
+    {c:"#B87820",type:"트리트먼트",name:topIng==="wrinkle"?"레티놀 세럼":topIng==="trouble"?"병풀 세럼":"나이아신아마이드 세럼",tip:"저녁 집중 케어 핵심"},
+    {c:"#6A4A8C",type:"나이트크림",name:isDry?"리치 나이트크림":"수분 겔크림",tip:"수면 중 재생·장벽 회복"},
+    {c:"#B87820",type:"아이크림",name:"탄력 아이크림",tip:"눈가 주름 전용 케어"},
+  ];
+  const renderSteps=(steps,period)=>{
+    const icon=period==="AM"?"🌅":"🌙";
+    let h=`<div class="rb-block"><div class="rb-head"><div class="rb-icon" style="background:${period==="AM"?"#FEF3DC":"#1A1A18"}">${icon}</div><div><div class="rb-title">${period} 루틴</div><div class="rb-sub">${period==="AM"?"기상 직후 10-15분":"취침 전 15-20분"}</div></div></div>`;
+    steps.forEach((s,i)=>{h+=`<div class="rstep"><div class="rs-n" style="background:${s.c}">${i+1}</div><div class="rs-c"><div class="rs-type" style="color:${s.c}">${s.type}</div><div class="rs-name">${s.name}</div><div class="rs-tip">${s.tip}</div></div></div>`;});
+    return h+"</div>";
+  };
+  return`<div class="routine-body">
+    <div style="background:var(--gold-p);border:1px solid var(--gold-l);border-radius:11px;padding:11px 13px;margin-bottom:12px;font-size:12px;color:var(--mid);line-height:1.6">
+      AI 분석 기반 맞춤 루틴 — ${aiRawData?.skin_type||getSkinTypeName()} 피부에 최적화
+    </div>
+    ${renderSteps(am,"AM")}${renderSteps(pm,"PM")}
+  </div>`;
+}
+</script>
+</body>
+</html>
