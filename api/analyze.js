@@ -18,7 +18,10 @@ export default async function handler(req, res) {
         'x-api-key': apiKey,
         'anthropic-version': '2023-06-01'
       },
-      body: JSON.stringify(req.body)
+      body: JSON.stringify({
+        ...req.body,
+        temperature: 0  // 동일 사진 → 일관된 결과
+      })
     });
 
     const data = await response.json();

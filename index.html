@@ -149,7 +149,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 
 /* CAMERA */
 .cam-area{position:relative;overflow:hidden;background:#080808;flex:1;min-height:0}
-.cam-area video{width:100%;height:100%;display:block;object-fit:cover}
+.cam-area video{width:100%;height:100%;display:block;object-fit:cover;transform:scaleX(-1)} /* 프리뷰만 거울 반전 */
 #oc{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
 #ac{display:none}
 .cam-badge{position:absolute;top:10px;left:50%;transform:translateX(-50%);background:rgba(8,8,8,.75);backdrop-filter:blur(8px);color:rgba(255,255,255,.9);font-size:11px;font-weight:500;padding:5px 15px;border-radius:20px;border:1px solid rgba(255,255,255,.14);white-space:nowrap;z-index:10;transition:all .3s}
@@ -506,7 +506,7 @@ input[type=file]{display:none}
       </div>
     </div>
     <div class="cam-ctrls">
-      <button class="cc pr" id="btn-cam" onclick="startCam()">📷 카메라</button>
+      <button class="cc pr" id="btn-cam" onclick="startCam()">카메라</button>
       <button class="cc" onclick="manualSnap()">⏺ 수동</button>
       <button class="cc" onclick="document.getElementById('fi').click()">🖼️ 갤러리</button>
       <button class="cc" onclick="resetCap()">↺ 다시</button>
@@ -702,7 +702,7 @@ function startCam(){
     v.srcObject=s;v.style.display="block";
     document.getElementById("cam-ph").style.display="none";
     document.getElementById("align-hud").style.display="block";
-    document.getElementById("btn-cam").textContent="📹 작동 중";
+    document.getElementById("btn-cam").textContent="촬영 중...";
     document.getElementById("btn-cam").disabled=true;
     v.onloadedmetadata=()=>{
       const oc=document.getElementById("oc"),ac=document.getElementById("ac");
@@ -725,7 +725,7 @@ function stopCam(){
   const v=document.getElementById("vid");if(v)v.style.display="none";
   const hud=document.getElementById("align-hud");if(hud)hud.style.display="none";
   const ph=document.getElementById("cam-ph");if(ph)ph.style.display="flex";
-  const bc=document.getElementById("btn-cam");if(bc){bc.disabled=false;bc.textContent="📷 카메라";}
+  const bc=document.getElementById("btn-cam");if(bc){bc.disabled=false;bc.textContent="카메라";}
   const so=document.getElementById("scan-overlay");if(so)so.style.display="none";
 }
 
@@ -754,7 +754,12 @@ function detectLoop(){
   if(!v.videoWidth){animId=requestAnimationFrame(detectLoop);return;}
 
   const ctx=ac.getContext("2d");
+  // 프리뷰가 CSS scaleX(-1)이므로 감지용 캔버스도 동일하게 반전
+  ctx.save();
+  ctx.translate(ac.width,0);
+  ctx.scale(-1,1);
   ctx.drawImage(v,0,0,ac.width,ac.height);
+  ctx.restore();
   const W=ac.width,H=ac.height;
   // 정면 타원 (중앙)
   const cx=W*.5,cy=H*.43,rx=W*.28,ry=H*.35;
@@ -801,11 +806,11 @@ function updateHUD(state){
   const txt=document.getElementById("atxt");
   const badge=document.getElementById("cam-badge");
   const msgs={
-    none:  {dot:"",    txt:"얼굴을 타원 안에 맞춰주세요",   badge:"🔍 얼굴을 인식하는 중..."},
-    far:   {dot:"",    txt:"얼굴이 너무 멀어요. 가까이 오세요", badge:"📏 조금 더 가까이"},
-    close: {dot:"p",   txt:"너무 가까워요. 조금 물러서세요", badge:"↔️ 조금 멀리"},
-    partial:{dot:"p",  txt:"조금 더 정면으로 맞춰주세요",   badge:"😊 거의 됐어요..."},
-    good:  {dot:"g",   txt:"완벽해요! 유지해주세요 ✨",     badge:"✅ 얼굴 인식 완료"},
+    none:  {dot:"",   txt:"얼굴을 타원 안에 맞춰주세요",    badge:"얼굴을 인식하는 중..."},
+    far:   {dot:"",   txt:"얼굴이 너무 멀어요. 가까이 오세요", badge:"조금 더 가까이"},
+    close: {dot:"p",  txt:"너무 가까워요. 조금 물러서세요",  badge:"조금 멀리 서주세요"},
+    partial:{dot:"p", txt:"조금 더 정면으로 맞춰주세요",    badge:"거의 됐어요..."},
+    good:  {dot:"g",  txt:"완벽해요! 유지해주세요",         badge:"얼굴 인식 완료 - 촬영 준비중"},
   };
   const m=msgs[state]||msgs.none;
   dot.className="adot"+(m.dot?" "+m.dot:"");
@@ -834,7 +839,8 @@ function drawGuideEnhanced(oc,W,H,cx,cy,rx,ry,state){
   // 코너 마커
   const corners=[[cx-rx*.72,cy-ry*.85,1,0,0,1],[cx+rx*.72,cy-ry*.85,-1,0,0,1],
                   [cx-rx*.72,cy+ry*.85,1,0,0,-1],[cx+rx*.72,cy+ry*.85,-1,0,0,-1]];
-  corners.forEach(([x,y,hx,,vy])=>{
+  corners.forEach(function(pt){
+    var x=pt[0],y=pt[1],hx=pt[2],vy=pt[5];
     ctx.save();ctx.strokeStyle=col;ctx.lineWidth=2.5;ctx.lineCap="round";ctx.setLineDash([]);
     ctx.shadowColor=col;ctx.shadowBlur=8;
     ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+hx*18,y);ctx.stroke();
@@ -858,7 +864,7 @@ function startCd(){
     if(stableFrames<STABLE_NEEDED-2){clearCd();return;} // 얼굴 빠지면 취소
     el+=iv;
     const rem=Math.max(0,Math.ceil((total-el)/1000));
-    num.textContent=rem>0?rem:"📸";
+    num.textContent=rem>0?rem:"찰칵";
     ring.style.strokeDashoffset=213.6*(1-el/total);
     if(el>=total){clearCd();doSnap();}
   },iv);
@@ -882,7 +888,13 @@ function doSnap(){
     const v=document.getElementById("vid"),ac=document.getElementById("ac");
     if(!v||!v.videoWidth)return;
     const ctx=ac.getContext("2d");
+    // 전면카메라 프리뷰는 CSS로 반전돼 있으므로
+    // 캔버스 저장 시 좌우 반전 해제 → 정방향 이미지 저장
+    ctx.save();
+    ctx.translate(ac.width,0);
+    ctx.scale(-1,1);
     ctx.drawImage(v,0,0,ac.width,ac.height);
+    ctx.restore();
     const url=ac.toDataURL("image/jpeg",.90);
     captured[0]=url;
     capStep=1;
@@ -896,7 +908,7 @@ function doSnap(){
     document.getElementById("cap-hint").innerHTML="✅ 촬영 완료!<br>AI 분석 시작을 눌러주세요.";
     document.getElementById("btn-analyze").disabled=false;
     document.getElementById("btn-analyze").textContent="AI 분석 시작 →";
-    showToast("📸 촬영 완료!");
+    showToast("촬영 완료!");
     stopCam();
   },400);
 }
@@ -931,7 +943,7 @@ function fileSnap(e){
     document.getElementById("cap-hint").innerHTML="✅ 이미지 업로드 완료!<br>AI 분석 시작을 눌러주세요.";
     document.getElementById("btn-analyze").disabled=false;
     document.getElementById("btn-analyze").textContent="AI 분석 시작 →";
-    showToast("🖼️ 업로드 완료 ✓");
+    showToast("업로드 완료");
   };
   r.readAsDataURL(f);
   e.target.value="";
@@ -997,54 +1009,30 @@ async function analyzeWithClaude(images){
   }
 }
 
-async function analyzeWithFacePP(images){
-  /* Face++ Skin Analyze API
-   * 엔드포인트: https://api-us.faceplusplus.com/facepp/v3/skinanalyze
-   * 반환: acne, stain, dark_circle, oiliness, moisture 등 9개 지표
-   * 무료 월 400회 · faceplusplus.com 에서 API Key 발급
-   */
-  const apiKey=document.getElementById("fp-key")?.value||"";
-  const apiSecret=document.getElementById("fp-secret")?.value||"";
-  if(!apiKey||!apiSecret)throw new Error("Face++ API Key와 Secret을 입력해주세요");
-
-  const frontImg=images[0];
-  if(!frontImg)throw new Error("정면 이미지가 없습니다");
-
-  const formData=new FormData();
-  formData.append("api_key",apiKey);
-  formData.append("api_secret",apiSecret);
-  formData.append("image_base64",frontImg.replace(/^data:image\/\w+;base64,/,""));
-
-  const res=await fetch("https://api-us.faceplusplus.com/facepp/v3/skinanalyze",{
-    method:"POST",body:formData
-  });
-  if(!res.ok)throw new Error(`Face++ API 오류: ${res.status}`);
-  const data=await res.json();
-
-  // Face++ 결과를 우리 포맷으로 변환
-  const sk=data.result?.skin_status||{};
-  const toScore=(v,higher_is_bad=true)=>{
-    const n=parseFloat(v)||50;
-    return higher_is_bad?Math.round(Math.max(10,Math.min(95,100-n))):Math.round(Math.max(10,Math.min(95,n)));
-  };
-  return{
-    wrinkle:toScore(sk.forehead_wrinkle||sk.eye_finelines||40,true),
-    pore:toScore(sk.pore||35,true),
-    pigment:toScore(sk.stain||30,true),
-    sebum:toScore(sk.oiliness||50,true),
-    trouble:toScore(sk.acne||25,true),
-    skin_age:parseInt(data.result?.skin_status?.health||"0")>70?actualAge-3:actualAge+5,
-    spot_count:Math.round((parseFloat(sk.stain||30)/3)),
-    wrinkle_zones:["눈가","이마"],
-    skin_type:"복합성",
-    top_concerns:["모공","트러블","색소"],
-    hydration:"보통",
-    overall_comment:`Face++ AI가 피부를 분석했습니다. 피부 건강도: ${sk.health||"—"}`,
-    improvement_tips:["보습 집중 케어","자외선 차단","규칙적인 수면"],
-    image_quality:"좋음",
-    confidence:75
-  };
+function showApiError(msg){
+  // 분석 화면에 에러 UI 표시
+  const wrap=document.getElementById("s5")?.querySelector(".analysis-wrap");
+  if(!wrap)return;
+  const existing=document.getElementById("api-error-box");
+  if(existing)existing.remove();
+  const box=document.createElement("div");
+  box.id="api-error-box";
+  box.style.cssText="width:100%;margin-top:16px;background:rgba(204,60,60,.12);border:1px solid rgba(204,60,60,.35);border-radius:14px;padding:18px;text-align:center";
+  box.innerHTML=`
+    <div style="font-size:28px;margin-bottom:8px">⚠️</div>
+    <div style="font-size:14px;font-weight:700;color:rgba(220,80,80,.95);margin-bottom:8px">AI 분석 연결 실패</div>
+    <div style="font-size:12px;color:rgba(255,255,255,.55);line-height:1.7;margin-bottom:14px">${msg||"API 서버에 연결할 수 없습니다"}</div>
+    <div style="background:rgba(255,255,255,.06);border-radius:10px;padding:12px;font-size:11px;color:rgba(255,255,255,.45);line-height:1.8;text-align:left;margin-bottom:14px">
+      <strong style="color:rgba(255,200,80,.8)">확인 사항</strong><br>
+      1. Vercel → Settings → Environment Variables<br>
+      2. <code>ANTHROPIC_API_KEY</code> 값 입력 여부<br>
+      3. Redeploy 실행 여부
+    </div>
+    <button onclick="goTo(4)" style="width:100%;padding:10px;border:none;border-radius:9px;background:rgba(255,255,255,.12);color:#fff;font-size:13px;font-weight:600;cursor:pointer">← 다시 촬영하기</button>`;
+  wrap.appendChild(box);
 }
+
+async function analyzeWithFacePP(){return null;} // 미사용
 
 // 라이프스타일 보정 인자 계산
 function calcLifestyleAdjust(){
@@ -1143,20 +1131,17 @@ async function runAIAnalysis(){
     setStageState(3,"done");
     setStageState(4,"active");
 
-    // ── REAL API CALL → 실패 시 자동 시뮬레이션 전환 ──
+    // ── REAL API CALL ──
     let aiData;
     try{
-      if(selectedApi==="facepp"){
-        aiData=await analyzeWithFacePP(captured);
-      } else {
-        aiData=await analyzeWithClaude(captured);
-      }
+      aiData=await analyzeWithClaude(captured);
       isSimulation=false;
     }catch(apiErr){
-      console.warn("AI API 분석 → 시뮬레이션 모드 자동 전환:", apiErr.message);
-      // 오류 표시 없이 자동으로 시뮬레이션 모드 전환
-      isSimulation=true;
-      aiData=simulateSkinAnalysis();
+      console.error("AI API 오류:", apiErr.message);
+      // 조용히 넘어가지 않고 사용자에게 명확히 표시
+      setStageState(4,"error");
+      showApiError(apiErr.message);
+      return;
     }
 
     setStageState(4,"done");
@@ -1177,22 +1162,8 @@ async function runAIAnalysis(){
     setTimeout(()=>goTo(6),600);
   }catch(e){
     console.error(e);
-    // 최후 안전망: 오류 발생해도 시뮬레이션으로 자동 진행
-    isSimulation=true;
-    const sim=simulateSkinAnalysis();
-    aiRawData=sim;
-    const cl=v=>Math.round(Math.max(18,Math.min(95,v)));
-    const adj=calcLifestyleAdjust();
-    scores={
-      wrinkle:cl(sim.wrinkle+adj.wrinkle*.3),
-      pore:cl(sim.pore+adj.pore*.3),
-      pigment:cl(sim.pigment+adj.pigment*.3),
-      sebum:cl(sim.sebum+adj.sebum*.3),
-      trouble:cl(sim.trouble+adj.trouble*.3),
-    };
-    skinAge=sim.skin_age;
-    setStageState(4,"done");
-    setTimeout(()=>goTo(6),600);
+    setStageState(4,"error");
+    showApiError(String(e.message||e));
   }
 }
 
@@ -1231,7 +1202,7 @@ function buildResults(){
   document.getElementById("rpt-api-lbl").textContent=isSimulation?"AI 분석 (라이프스타일 기반)":"AI 피부 분석";
   document.getElementById("rpt-skin-type").textContent=aiRawData?.skin_type||getSkinTypeName();
   const conf=aiRawData?.confidence||0;
-  document.getElementById("rpt-conf-lbl").textContent=isSimulation?"🔵 추정 분석":`🎯 신뢰도 ${conf}%`;
+  document.getElementById("rpt-conf-lbl").textContent=isSimulation?"추정 분석":`신뢰도 ${conf}%`;
   const diff=skinAge-actualAge;
   const confBg=isSimulation?"rgba(75,94,252,.1)":conf>=70?"rgba(46,139,87,.12)":"rgba(208,128,32,.12)";
   document.getElementById("rpt-conf-badge").style.background=confBg;
@@ -1358,63 +1329,108 @@ function buildAnalyzeTab(){
 // TAB 2: AI 상세 분석
 function buildAIDetailTab(){
   const conf=aiRawData?.confidence||0;
-  const isReal=!isSimulation;
-  const confColor=isReal&&conf>=70?"var(--grn)":conf>=50?"var(--amber)":"var(--soft)";
-  return`<div class="ai-detail-body">
-    <!-- 신뢰도 미터 -->
+  const confColor=!isSimulation&&conf>=70?"var(--grn)":conf>=50?"var(--amber)":"var(--red)";
+
+  // 실제 AI 분석인지 시뮬레이션인지 명확히 구분
+  const statusBanner=isSimulation
+    ?`<div style="background:rgba(208,128,32,.1);border:1px solid rgba(208,128,32,.3);border-radius:11px;padding:12px 14px;margin-bottom:14px;display:flex;align-items:flex-start;gap:10px">
+        <span style="font-size:20px;flex-shrink:0">⚠️</span>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:var(--amber);margin-bottom:4px">라이프스타일 기반 추정 결과</div>
+          <div style="font-size:12px;color:var(--mid);line-height:1.6">실제 사진 분석이 아닌 입력하신 나이·라이프스타일 데이터를 기반으로 추정한 결과입니다. Vercel API 키 설정 여부를 확인해주세요.</div>
+        </div>
+      </div>`
+    :`<div style="background:rgba(46,139,87,.08);border:1px solid rgba(46,139,87,.25);border-radius:11px;padding:12px 14px;margin-bottom:14px;display:flex;align-items:flex-start;gap:10px">
+        <span style="font-size:20px;flex-shrink:0">✅</span>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:var(--grn);margin-bottom:4px">Claude AI 실제 사진 분석 결과</div>
+          <div style="font-size:12px;color:var(--mid);line-height:1.6">업로드된 사진을 Claude Vision AI가 직접 분석한 결과입니다.</div>
+        </div>
+      </div>`;
+
+  // 신뢰도 미터 (실제 분석일 때만 의미있게 표시)
+  const confMeter=!isSimulation?`
     <div class="conf-meter">
-      <div class="conf-title">🎯 분석 신뢰도 (Confidence)
-        <span style="font-size:10px;color:var(--soft);font-weight:normal">${isSimulation?"시뮬레이션":"실제 AI 분석"}</span>
+      <div class="conf-title">🎯 분석 신뢰도
+        <span style="font-size:10px;color:var(--soft);font-weight:normal">${aiRawData?.image_quality||""} 이미지</span>
       </div>
-      <div class="conf-bar-wrap"><div class="conf-bar" data-w="${conf}%" style="width:0;background:${isReal?"linear-gradient(90deg,var(--ai),#6E7EFC)":"var(--soft)"}"></div></div>
+      <div class="conf-bar-wrap"><div class="conf-bar" data-w="${conf}%" style="width:0"></div></div>
       <div class="conf-meta">
-        <span>${aiRawData?.image_quality||"—"} 이미지 품질</span>
-        <span style="font-family:'DM Mono',monospace;font-size:11px;color:${confColor};font-weight:700">${conf}%</span>
+        <span style="font-size:12px;color:var(--mid)">${conf>=70?"조도·각도 양호":"조도를 밝게 하거나 정면을 유지하면 정확도가 높아집니다"}</span>
+        <span style="font-family:'DM Mono',monospace;font-size:12px;color:${confColor};font-weight:700">${conf}%</span>
       </div>
-      <div style="font-size:11px;color:var(--soft);margin-top:8px;line-height:1.5">
-        ${isSimulation?"📊 라이프스타일 기반 추정 분석입니다. 카메라로 촬영하면 더 정밀한 결과를 확인할 수 있습니다.":conf>=70?"✓ 높은 신뢰도 — 이미지 품질이 양호하여 분석 결과를 신뢰할 수 있습니다.":"⚠ 중간 신뢰도 — 더 나은 조도·각도에서 재촬영하면 정확도가 높아집니다."}
+    </div>`:"";
+
+  // Claude가 응답한 종합 소견 (핵심)
+  const overallComment=aiRawData?.overall_comment?`
+    <div class="ai-detail-card">
+      <div class="dc-title">🩺 AI 종합 소견</div>
+      <div class="dc-body" style="font-size:13px;line-height:1.85">${aiRawData.overall_comment}</div>
+    </div>`:"";
+
+  // 피부 타입 + 주요 고민
+  const skinTypeCard=aiRawData?.skin_type||aiRawData?.top_concerns?.length?`
+    <div class="ai-detail-card">
+      <div class="dc-title">🏷 피부 타입 · 주요 고민</div>
+      ${aiRawData?.skin_type?`<div style="display:inline-block;background:var(--gold-l);color:var(--gold);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:10px">${aiRawData.skin_type}</div>`:""}
+      ${aiRawData?.top_concerns?.length?`<div style="display:flex;flex-wrap:wrap;gap:6px">${aiRawData.top_concerns.map(c=>`<span style="background:var(--red-l);color:var(--red);font-size:12px;font-weight:600;padding:4px 10px;border-radius:10px">${c}</span>`).join("")}</div>`:""}
+    </div>`:"";
+
+  // 수분 + 잡티 + 주름 부위
+  const detailCards=[
+    aiRawData?.hydration?`
+    <div class="ai-detail-card">
+      <div class="dc-title">💧 수분 상태</div>
+      <div style="font-size:15px;font-weight:700;color:var(--dark);margin-bottom:4px">${aiRawData.hydration}</div>
+      <div class="dc-body">AI가 사진의 피부 광택과 표면 상태를 보고 판단한 수분 수준입니다.</div>
+    </div>`:"",
+    aiRawData?.spot_count!==undefined?`
+    <div class="ai-detail-card">
+      <div class="dc-title">🌑 잡티 · 점 개수</div>
+      <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:4px">
+        <span class="spot-num">${aiRawData.spot_count}</span>
+        <span style="font-size:13px;color:var(--soft)">개</span>
       </div>
-    </div>
+      <div class="dc-body">AI가 사진에서 육안으로 식별한 잡티·점의 개수입니다. 촬영 조도·해상도에 따라 ±5개 오차가 있을 수 있습니다.</div>
+    </div>`:"",
+    aiRawData?.wrinkle_zones?.length?`
+    <div class="ai-detail-card">
+      <div class="dc-title">🔍 주름 감지 부위</div>
+      <div class="zones-wrap" style="margin-bottom:8px">${aiRawData.wrinkle_zones.map(z=>`<span class="zone-tag">${z}</span>`).join("")}</div>
+      <div class="dc-body">AI가 사진에서 주름이 보이는 부위를 직접 식별한 결과입니다.</div>
+    </div>`:"",
+  ].filter(Boolean).join("");
 
-    <!-- 잡티 수 -->
-    ${aiRawData?.spot_count!==undefined?`<div class="ai-detail-card">
-      <div class="dc-title">🌑 잡티 감지 수 (AI 측정)</div>
-      <div style="display:flex;align-items:baseline">
-        <div class="spot-num">${aiRawData.spot_count}</div>
-        <div style="font-size:12px;color:var(--soft)">개 추정 (육안 가시 잡티·점)</div>
-      </div>
-      <div class="dc-body" style="margin-top:6px">색소침착 면적·대비 분석으로 추정. 실제 수와 ±5개 오차 가능.</div>
-    </div>`:""}
+  // AI 개선 팁
+  const tipsCard=aiRawData?.improvement_tips?.length?`
+    <div class="ai-detail-card">
+      <div class="dc-title">💡 AI 맞춤 개선 팁</div>
+      ${aiRawData.improvement_tips.map((t,i)=>`
+        <div style="display:flex;gap:10px;margin-bottom:10px;align-items:flex-start">
+          <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--gold);font-weight:700;flex-shrink:0;margin-top:2px">0${i+1}</span>
+          <div class="dc-body" style="font-size:13px">${t}</div>
+        </div>`).join("")}
+    </div>`:"";
 
-    <!-- 주름 부위 -->
-    ${aiRawData?.wrinkle_zones?.length?`<div class="ai-detail-card">
-      <div class="dc-title">🔍 주름 감지 부위 (AI 분석)</div>
-      <div class="zones-wrap">${aiRawData.wrinkle_zones.map(z=>`<span class="zone-tag">${z}</span>`).join("")}</div>
-      <div class="dc-body" style="margin-top:8px">Edge Detection 알고리즘으로 감지된 주름 밀집 부위입니다.</div>
-    </div>`:""}
-
-    <!-- 수분감 -->
-    ${aiRawData?.hydration?`<div class="ai-detail-card">
-      <div class="dc-title">💧 피부 수분감</div>
-      <div class="dc-body">${aiRawData.hydration} — 피부 광택도·표면 반사율 기반 추정</div>
-    </div>`:""}
-
-    <!-- 개선 팁 -->
-    ${aiRawData?.improvement_tips?.length?`<div class="ai-detail-card">
-      <div class="dc-title">💡 AI 개선 팁</div>
-      ${aiRawData.improvement_tips.map((t,i)=>`<div style="display:flex;gap:8px;margin-bottom:6px;align-items:flex-start"><span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--gold);flex-shrink:0;margin-top:2px">0${i+1}</span><div class="dc-body">${t}</div></div>`).join("")}
-    </div>`:""}
-
-    <!-- 원본 AI 응답 JSON 토글 -->
+  // 원본 JSON 토글 (개발용)
+  const rawToggle=`
     <div class="raw-toggle" onclick="toggleRaw()">
-      <span id="raw-toggle-icon">▶</span> 원본 분석 데이터 (JSON)
+      <span id="raw-toggle-icon">▶</span> 원본 AI 응답 데이터 (JSON)
     </div>
     <div id="raw-panel" style="display:none">
-      <div class="raw-data">
-        <pre>${JSON.stringify(aiRawData,null,2)}</pre>
-      </div>
-    </div>
+      <div class="raw-data"><pre>${JSON.stringify(aiRawData,null,2)}</pre></div>
+    </div>`;
+
+  return`<div class="ai-detail-body">
+    ${statusBanner}
+    ${confMeter}
+    ${overallComment}
+    ${skinTypeCard}
+    ${detailCards}
+    ${tipsCard}
+    ${rawToggle}
   </div>`;
+}
 }
 
 function toggleRaw(){
@@ -1475,7 +1491,7 @@ function buildRoutineTab(){
     {c:"#B87820",type:"아이크림",name:"탄력 아이크림",tip:"눈가 주름 전용 케어"},
   ];
   const renderSteps=(steps,period)=>{
-    const icon=period==="AM"?"🌅":"🌙";
+    const icon=period==="AM"?"&#127749;":"&#127769;";
     let h=`<div class="rb-block"><div class="rb-head"><div class="rb-icon" style="background:${period==="AM"?"#FEF3DC":"#1A1A18"}">${icon}</div><div><div class="rb-title">${period} 루틴</div><div class="rb-sub">${period==="AM"?"기상 직후 10-15분":"취침 전 15-20분"}</div></div></div>`;
     steps.forEach((s,i)=>{h+=`<div class="rstep"><div class="rs-n" style="background:${s.c}">${i+1}</div><div class="rs-c"><div class="rs-type" style="color:${s.c}">${s.type}</div><div class="rs-name">${s.name}</div><div class="rs-tip">${s.tip}</div></div></div>`;});
     return h+"</div>";
