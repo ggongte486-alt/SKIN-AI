@@ -569,14 +569,14 @@ input[type=file]{display:none}
 //  DATA
 // ══════════════════════════════════════════════════════════
 const CONCERNS=[
-  {e:"🌊",n:"수분부족",k:"dry",g:"피부 당김·각질·건조함을 자주 느끼시나요? 수분 장벽 기능을 집중 분석합니다."},
-  {e:"🔍",n:"주름",k:"wrinkle",g:"이마·눈가·팔자 주름이 고민이신가요? Edge Detection으로 주름 밀도와 깊이를 측정합니다."},
-  {e:"📍",n:"모공",k:"pore",g:"코·볼 주변 넓은 모공이 신경 쓰이시나요? 모공 크기·밀집도를 분석해 수축 루틴을 추천합니다."},
-  {e:"🌑",n:"색소/잡티",k:"pigment",g:"기미·잡티·색소침착이 있으신가요? 색소 면적과 개수를 측정해 미백 케어를 안내합니다."},
-  {e:"💧",n:"지성/건성",k:"sebum",g:"유분이 많거나 반대로 너무 건조하신가요? 피지 반사도로 유수분 균형을 평가합니다."},
-  {e:"🌸",n:"트러블",k:"trouble",g:"여드름·홍조·민감 반응이 잦으신가요? 트러블 영역을 감지해 진정 성분을 처방합니다."},
-  {e:"✨",n:"피부 생기",k:"vitality",g:"칙칙하고 생기 없어 보인다고 느끼시나요? 피부 광택도와 균일함을 분석해 생기 케어를 추천합니다."},
-  {e:"🏔",n:"피부결",k:"texture",g:"피부 표면이 거칠거나 울퉁불퉁하신가요? 피부결 균일도를 측정해 각질 관리 루틴을 안내합니다."},
+  {e:"\uD83C\uDF0A",n:"수분부족",k:"dry",g:"피부 당김·각질·건조함을 자주 느끼시나요? 수분 장벽 기능을 집중 분석합니다."},
+  {e:"\uD83D\uDD0D",n:"주름",k:"wrinkle",g:"이마·눈가·팔자 주름이 고민이신가요? Edge Detection으로 주름 밀도와 깊이를 측정합니다."},
+  {e:"\uD83D\uDCCD",n:"모공",k:"pore",g:"코·볼 주변 넓은 모공이 신경 쓰이시나요? 모공 크기·밀집도를 분석해 수축 루틴을 추천합니다."},
+  {e:"\uD83C\uDF11",n:"색소/잡티",k:"pigment",g:"기미·잡티·색소침착이 있으신가요? 색소 면적과 개수를 측정해 미백 케어를 안내합니다."},
+  {e:"\uD83D\uDCA7",n:"지성/건성",k:"sebum",g:"유분이 많거나 반대로 너무 건조하신가요? 피지 반사도로 유수분 균형을 평가합니다."},
+  {e:"\uD83C\uDF38",n:"트러블",k:"trouble",g:"여드름·홍조·민감 반응이 잦으신가요? 트러블 영역을 감지해 진정 성분을 처방합니다."},
+  {e:"\u2728",n:"피부 생기",k:"vitality",g:"칙칙하고 생기 없어 보인다고 느끼시나요? 피부 광택도와 균일함을 분석해 생기 케어를 추천합니다."},
+  {e:"\uD83C\uDFD4",n:"피부결",k:"texture",g:"피부 표면이 거칠거나 울퉁불퉁하신가요? 피부결 균일도를 측정해 각질 관리 루틴을 안내합니다."},
 ];
 const METRICS=[
   {k:"wrinkle",n:"주름",desc:"주름 밀도·길이 픽셀 측정 (Edge Detection 기반)"},
@@ -925,7 +925,7 @@ function resetCap(){
   const th=document.getElementById("th-0");
   if(th)th.innerHTML=`<span style="font-size:10px;color:var(--soft)">정면</span>`;
   document.getElementById("cap-hint").innerHTML=
-    "📌 <strong>촬영 가이드</strong><br>밝은 곳에서 정면을 바라보세요<br>타원 초록색 → 자동 촬영 (3초)";
+    " <strong>촬영 가이드</strong><br>밝은 곳에서 정면을 바라보세요<br>타원 초록색 → 자동 촬영 (3초)";
   document.getElementById("btn-analyze").disabled=true;
   document.getElementById("btn-analyze").textContent="AI 분석 시작";
   const overlay=document.getElementById("cap-done-overlay");
@@ -1261,7 +1261,7 @@ function buildAgeTab(){
   <div class="piza-sec-hdr"><span class="piza-sec-lbl">피부나이 기여 인자</span></div>
   <div style="padding:14px 20px 10px">
     <div style="background:var(--amber-l);border:1px solid rgba(208,128,32,.2);border-radius:10px;padding:11px 13px;margin-bottom:12px;font-size:12px;color:var(--mid);line-height:1.7">
-      <strong style="color:var(--amber)">📊 기여 인자란?</strong><br>
+      <strong style="color:var(--amber)"> 기여 인자란?</strong><br>
       각 피부 지표가 현재 피부나이를 실제 나이보다 얼마나 높이고 있는지를 나타냅니다.<br>
       예: <em>주름 기여도 +7년</em>이면 주름 상태만으로 피부나이가 7년 더 많아 보인다는 뜻입니다. 수치가 낮을수록 좋습니다.
     </div>
@@ -1280,7 +1280,7 @@ function buildAgeTab(){
         <div class="pct-ani" data-w="${Math.min(100,(f.v/f.max)*100)}%" style="height:100%;width:0;background:${f.c};border-radius:3px;transition:width 1.4s"></div>
       </div>
     </div>`).join("")}
-    <div style="font-size:12px;color:var(--mid);line-height:1.7;padding:10px 0 3px;border-top:1px solid var(--border);margin-top:6px">${isSimulation?"💡 라이프스타일 데이터 기반 추정 결과입니다. 카메라로 촬영하면 더 정밀한 분석이 가능합니다.":"💡 라이프스타일(수면·수분·스트레스) 보정을 포함한 종합 분석 결과입니다."}</div>
+    <div style="font-size:12px;color:var(--mid);line-height:1.7;padding:10px 0 3px;border-top:1px solid var(--border);margin-top:6px">${isSimulation?" 라이프스타일 데이터 기반 추정 결과입니다. 카메라로 촬영하면 더 정밀한 분석이 가능합니다.":" 라이프스타일(수면·수분·스트레스) 보정을 포함한 종합 분석 결과입니다."}</div>
   </div>`;
 }
 
@@ -1351,7 +1351,7 @@ function buildAIDetailTab(){
   // 신뢰도 미터 (실제 분석일 때만 의미있게 표시)
   const confMeter=!isSimulation?`
     <div class="conf-meter">
-      <div class="conf-title">🎯 분석 신뢰도
+      <div class="conf-title"> 분석 신뢰도
         <span style="font-size:10px;color:var(--soft);font-weight:normal">${aiRawData?.image_quality||""} 이미지</span>
       </div>
       <div class="conf-bar-wrap"><div class="conf-bar" data-w="${conf}%" style="width:0"></div></div>
@@ -1364,14 +1364,14 @@ function buildAIDetailTab(){
   // Claude가 응답한 종합 소견 (핵심)
   const overallComment=aiRawData?.overall_comment?`
     <div class="ai-detail-card">
-      <div class="dc-title">🩺 AI 종합 소견</div>
+      <div class="dc-title"> AI 종합 소견</div>
       <div class="dc-body" style="font-size:13px;line-height:1.85">${aiRawData.overall_comment}</div>
     </div>`:"";
 
   // 피부 타입 + 주요 고민
   const skinTypeCard=aiRawData?.skin_type||aiRawData?.top_concerns?.length?`
     <div class="ai-detail-card">
-      <div class="dc-title">🏷 피부 타입 · 주요 고민</div>
+      <div class="dc-title"> 피부 타입 · 주요 고민</div>
       ${aiRawData?.skin_type?`<div style="display:inline-block;background:var(--gold-l);color:var(--gold);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:10px">${aiRawData.skin_type}</div>`:""}
       ${aiRawData?.top_concerns?.length?`<div style="display:flex;flex-wrap:wrap;gap:6px">${aiRawData.top_concerns.map(c=>`<span style="background:var(--red-l);color:var(--red);font-size:12px;font-weight:600;padding:4px 10px;border-radius:10px">${c}</span>`).join("")}</div>`:""}
     </div>`:"";
@@ -1380,13 +1380,13 @@ function buildAIDetailTab(){
   const detailCards=[
     aiRawData?.hydration?`
     <div class="ai-detail-card">
-      <div class="dc-title">💧 수분 상태</div>
+      <div class="dc-title"> 수분 상태</div>
       <div style="font-size:15px;font-weight:700;color:var(--dark);margin-bottom:4px">${aiRawData.hydration}</div>
       <div class="dc-body">AI가 사진의 피부 광택과 표면 상태를 보고 판단한 수분 수준입니다.</div>
     </div>`:"",
     aiRawData?.spot_count!==undefined?`
     <div class="ai-detail-card">
-      <div class="dc-title">🌑 잡티 · 점 개수</div>
+      <div class="dc-title"> 잡티 · 점 개수</div>
       <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:4px">
         <span class="spot-num">${aiRawData.spot_count}</span>
         <span style="font-size:13px;color:var(--soft)">개</span>
@@ -1395,7 +1395,7 @@ function buildAIDetailTab(){
     </div>`:"",
     aiRawData?.wrinkle_zones?.length?`
     <div class="ai-detail-card">
-      <div class="dc-title">🔍 주름 감지 부위</div>
+      <div class="dc-title"> 주름 감지 부위</div>
       <div class="zones-wrap" style="margin-bottom:8px">${aiRawData.wrinkle_zones.map(z=>`<span class="zone-tag">${z}</span>`).join("")}</div>
       <div class="dc-body">AI가 사진에서 주름이 보이는 부위를 직접 식별한 결과입니다.</div>
     </div>`:"",
@@ -1404,7 +1404,7 @@ function buildAIDetailTab(){
   // AI 개선 팁
   const tipsCard=aiRawData?.improvement_tips?.length?`
     <div class="ai-detail-card">
-      <div class="dc-title">💡 AI 맞춤 개선 팁</div>
+      <div class="dc-title"> AI 맞춤 개선 팁</div>
       ${aiRawData.improvement_tips.map((t,i)=>`
         <div style="display:flex;gap:10px;margin-bottom:10px;align-items:flex-start">
           <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--gold);font-weight:700;flex-shrink:0;margin-top:2px">0${i+1}</span>
