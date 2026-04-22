@@ -28,6 +28,7 @@ body{font-family:"Noto Sans KR",sans-serif;font-size:14px;line-height:1.6;displa
   html,body{padding:0;background:#DDD5C8;align-items:flex-start}
   .shell{border-radius:0;max-width:100%;width:100%;height:100vh;height:100dvh;max-height:none;min-height:0}
   .bot{padding:10px 16px 14px}
+  .cap-nav{padding:6px 16px 4px}
   .thumb-strip{padding:6px 12px}
   .th-slot{width:48px;height:48px}
   .cam-ctrls{padding:5px 12px;gap:4px}
@@ -146,43 +147,50 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 .ci.sel .ci-guide{color:var(--mid)}
 
 /* ── S4 CAPTURE ── */
+.cap-nav{display:flex;align-items:center;padding:8px 20px 6px;flex-shrink:0;gap:0}
+.cap-step{display:flex;flex-direction:column;align-items:center;flex:1}
+.cap-n{width:26px;height:26px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:"DM Mono",monospace;font-size:11px;color:var(--soft);background:var(--cream);margin-bottom:3px;transition:all .3s}
+.cap-step.active .cap-n{border-color:var(--ai);color:var(--ai);background:var(--ai-l)}
+.cap-step.done .cap-n{border-color:var(--grn);background:var(--grn);color:#fff}
+.cap-lbl{font-size:10px;color:var(--soft);transition:color .3s}
+.cap-step.active .cap-lbl{color:var(--dark);font-weight:600}
+.cap-step.done .cap-lbl{color:var(--grn)}
+.cap-line{flex:1;height:1px;background:var(--border);max-width:30px;margin-bottom:14px;transition:background .3s}
+.cap-line.done{background:var(--grn)}
 
 /* CAMERA */
 .cam-area{position:relative;overflow:hidden;background:#080808;flex:1;min-height:0}
 .cam-area video{width:100%;height:100%;display:block;object-fit:cover}
 #oc{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
 #ac{display:none}
-.cam-badge{position:absolute;top:10px;left:50%;transform:translateX(-50%);background:rgba(8,8,8,.75);backdrop-filter:blur(8px);color:rgba(255,255,255,.9);font-size:11px;font-weight:500;padding:5px 15px;border-radius:20px;border:1px solid rgba(255,255,255,.14);white-space:nowrap;z-index:10;transition:all .3s}
+.cam-badge{position:absolute;top:10px;left:50%;transform:translateX(-50%);background:rgba(8,8,8,.75);backdrop-filter:blur(8px);color:rgba(255,255,255,.9);font-size:11px;font-weight:500;padding:5px 15px;border-radius:20px;border:1px solid rgba(255,255,255,.14);white-space:nowrap;z-index:10}
 .scan-line-overlay{position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;overflow:hidden;display:none}
 .scan-beam{position:absolute;left:0;right:0;height:4px;background:linear-gradient(90deg,transparent,rgba(75,94,252,.6) 30%,rgba(180,220,255,.95) 50%,rgba(75,94,252,.6) 70%,transparent);box-shadow:0 0 20px 8px rgba(75,94,252,.3);animation:scan 2s ease-in-out infinite}
 @keyframes scan{0%{top:5%}100%{top:92%}}
 .scan-sides{position:absolute;inset:0;background:linear-gradient(to right,rgba(0,0,0,.4) 0%,transparent 18%,transparent 82%,rgba(0,0,0,.4) 100%)}
 .scan-dot{position:absolute;top:7px;left:50%;transform:translateX(-50%);width:7px;height:7px;border-radius:50%;background:#4CAF7A;box-shadow:0 0 8px #4CAF7A;animation:blink 1s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
-.align-hud{position:absolute;bottom:0;left:0;right:0;padding:10px 16px 13px;background:linear-gradient(to top,rgba(0,0,0,.75),transparent);display:none;z-index:10}
-.adot{width:9px;height:9px;border-radius:50%;background:var(--red);transition:background .3s;flex-shrink:0}
-.adot.p{background:var(--amber)}.adot.g{background:var(--grn2)}
+.align-hud{position:absolute;bottom:0;left:0;right:0;padding:9px 15px 11px;background:linear-gradient(to top,rgba(0,0,0,.65),transparent);display:none;z-index:10}
+.adot{width:8px;height:8px;border-radius:50%;background:var(--red);transition:background .3s;flex-shrink:0}
+.adot.p{background:var(--amber)} .adot.g{background:var(--grn2)}
 .cd-wrap{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:none;flex-direction:column;align-items:center;z-index:12}
-.cd-svg{width:86px;height:86px}
+.cd-svg{width:80px;height:80px}
 .cam-ph{width:100%;height:100%;background:var(--sand);display:flex;flex-direction:column;align-items:center;justify-content:center}
-.cam-ph-icon{font-size:40px;margin-bottom:12px}
-.cam-ph-txt{font-size:14px;font-weight:600;color:var(--mid);margin-bottom:5px}
-.cam-ph-sub{font-size:12px;color:var(--soft)}
-/* 촬영 완료 오버레이 */
-.cap-done-overlay{position:absolute;inset:0;background:rgba(46,139,87,.2);display:flex;align-items:center;justify-content:center;z-index:20;animation:fadeIn .3s ease}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-.cap-done-inner{display:flex;flex-direction:column;align-items:center;gap:8px}
-.cap-done-check{width:68px;height:68px;background:var(--grn);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;color:#fff;box-shadow:0 6px 28px rgba(46,139,87,.5)}
-.cap-done-txt{font-size:15px;font-weight:700;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.5)}
-/* 단일 촬영 스트립 */
-.single-strip{display:flex;gap:12px;padding:10px 16px;flex-shrink:0;background:var(--sand);border-top:1px solid var(--border);align-items:center}
-.single-guide{flex:1;font-size:11.5px;color:var(--mid);line-height:1.7}
-.th-slot{width:56px;height:56px;border-radius:8px;border:1.5px dashed var(--border);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--soft);position:relative;background:var(--cream);flex-shrink:0}
+.cam-ph-icon{font-size:36px;margin-bottom:10px}
+.cam-ph-txt{font-size:13px;font-weight:600;color:var(--mid);margin-bottom:4px}
+.cam-ph-sub{font-size:11px;color:var(--soft)}
+/* 썸네일 스트립 */
+.thumb-strip{display:flex;gap:7px;padding:8px 16px;flex-shrink:0;background:var(--sand);border-top:1px solid var(--border);align-items:center}
+.th-wrap{display:flex;flex-direction:column;align-items:center;gap:3px}
+.th-slot{width:54px;height:54px;border-radius:8px;border:1px dashed var(--border);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--soft);position:relative;background:var(--cream)}
 .th-slot img{width:100%;height:100%;object-fit:cover}
-.th-tick{position:absolute;top:2px;right:2px;width:15px;height:15px;background:var(--grn);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:8px}
-/* 촬영 컨트롤 버튼 */
+.th-tick{position:absolute;top:2px;right:2px;width:14px;height:14px;background:var(--grn);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:8px}
+.th-lbl{font-size:9px;color:var(--soft)}
+.th-hint{flex:1;display:flex;align-items:center;padding-left:6px;font-size:11px;color:var(--soft);line-height:1.5}
+.th-hint{flex:1;display:flex;align-items:center;padding-left:6px;font-size:11px;color:var(--soft);line-height:1.5}
+/* 촬영 화면 컨트롤 */
 .cam-ctrls{display:flex;gap:5px;padding:6px 14px;flex-shrink:0}
-.cc{flex:1;padding:8px 2px;border:1px solid var(--border);border-radius:8px;background:var(--cream);font-size:11px;font-weight:500;color:var(--mid);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:3px;transition:all .15s;font-family:"Noto Sans KR",sans-serif}
+.cc{flex:1;padding:7px 2px;border:1px solid var(--border);border-radius:8px;background:var(--cream);font-size:11px;font-weight:500;color:var(--mid);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:3px;transition:all .15s;font-family:"Noto Sans KR",sans-serif}
 .cc:hover{border-color:var(--gold2);color:var(--gold);background:var(--gold-p)}
 .cc.pr{background:var(--dark);border-color:var(--dark);color:#fff}
 input[type=file]{display:none}
@@ -455,9 +463,15 @@ input[type=file]{display:none}
 
   <!-- ═══ S4 CAPTURE ═══ -->
   <div class="screen" id="s4">
-    <!-- 상태 배지 -->
+    <div class="cap-nav">
+      <div class="cap-step active" id="cs-0"><div class="cap-n" id="cn-0">1</div><div class="cap-lbl">정면</div></div>
+      <div class="cap-line" id="cl-0"></div>
+      <div class="cap-step" id="cs-1"><div class="cap-n" id="cn-1">2</div><div class="cap-lbl">좌측</div></div>
+      <div class="cap-line" id="cl-1"></div>
+      <div class="cap-step" id="cs-2"><div class="cap-n" id="cn-2">3</div><div class="cap-lbl">우측</div></div>
+    </div>
     <div class="cam-area" id="cam-area">
-      <div class="cam-badge" id="cam-badge">📷 카메라를 시작하세요</div>
+      <div class="cam-badge" id="cam-badge">😊 정면을 바라보세요</div>
       <video id="vid" autoplay playsinline muted style="display:none"></video>
       <canvas id="oc" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none"></canvas>
       <canvas id="ac" style="display:none"></canvas>
@@ -466,14 +480,12 @@ input[type=file]{display:none}
         <div class="scan-beam"></div>
         <div class="scan-dot"></div>
       </div>
-      <!-- 얼굴 정렬 HUD -->
       <div class="align-hud" id="align-hud">
         <div style="display:flex;align-items:center;gap:8px">
           <div class="adot" id="adot"></div>
-          <span style="font-size:12px;color:rgba(255,255,255,.95);font-weight:500" id="atxt">얼굴을 타원 안에 맞춰주세요</span>
+          <span style="font-size:11px;color:rgba(255,255,255,.9);font-weight:500" id="atxt">얼굴을 타원 안에 위치시키세요</span>
         </div>
       </div>
-      <!-- 카운트다운 -->
       <div class="cd-wrap" id="cd-wrap">
         <svg class="cd-svg" viewBox="0 0 80 80">
           <circle cx="40" cy="40" r="34" fill="rgba(0,0,0,.6)" stroke="rgba(255,255,255,.18)" stroke-width="3"/>
@@ -482,37 +494,26 @@ input[type=file]{display:none}
           <text id="cd-num" x="40" y="47" text-anchor="middle" fill="white" font-size="24" font-family="Cormorant Garamond,serif" font-weight="300">3</text>
         </svg>
       </div>
-      <!-- 촬영 완료 프리뷰 -->
-      <div class="cap-done-overlay" id="cap-done-overlay" style="display:none">
-        <div class="cap-done-inner">
-          <div class="cap-done-check">✓</div>
-          <div class="cap-done-txt">촬영 완료</div>
-        </div>
-      </div>
-      <!-- 카메라 미시작 플레이스홀더 -->
       <div class="cam-ph" id="cam-ph">
-        <div class="cam-ph-icon">🤳</div>
-        <div class="cam-ph-txt">정면을 바라보고 카메라 시작</div>
-        <div class="cam-ph-sub">얼굴이 타원에 맞으면 자동 촬영됩니다</div>
+        <div class="cam-ph-icon">📷</div>
+        <div class="cam-ph-txt">카메라를 시작하세요</div>
+        <div class="cam-ph-sub">얼굴 인식 후 AI가 자동 촬영합니다</div>
       </div>
     </div>
-    <!-- 촬영된 사진 프리뷰 + 가이드 -->
-    <div class="single-strip" id="single-strip">
-      <div class="th-slot" id="th-0" style="width:56px;height:56px;flex-shrink:0"><span style="font-size:10px;color:var(--soft)">정면</span></div>
-      <div class="single-guide" id="cap-hint">
-        📌 <strong>촬영 가이드</strong><br>
-        밝은 곳에서 정면을 바라보세요<br>
-        타원 초록색 → 자동 촬영 (3초)
-      </div>
+    <div class="thumb-strip">
+      <div class="th-wrap"><div class="th-slot" id="th-0"><span>정면</span></div><div class="th-lbl">정면</div></div>
+      <div class="th-wrap"><div class="th-slot" id="th-1"><span>좌측</span></div><div class="th-lbl">좌측 45°</div></div>
+      <div class="th-wrap"><div class="th-slot" id="th-2"><span>우측</span></div><div class="th-lbl">우측 45°</div></div>
+      <div class="th-hint" id="cap-hint">카메라 시작 후<br>타원에 얼굴을 맞추면<br>자동 촬영됩니다</div>
     </div>
     <div class="cam-ctrls">
       <button class="cc pr" id="btn-cam" onclick="startCam()">📷 카메라</button>
       <button class="cc" onclick="manualSnap()">⏺ 수동</button>
       <button class="cc" onclick="document.getElementById('fi').click()">🖼️ 갤러리</button>
-      <button class="cc" onclick="resetCap()">↺ 다시</button>
+      <button class="cc" onclick="resetCap()">↺ 초기화</button>
     </div>
     <input type="file" id="fi" accept="image/*" onchange="fileSnap(event)">
-    <div class="bot"><button class="btn btn-ai" id="btn-analyze" disabled onclick="goTo(5)">AI 분석 시작</button></div>
+    <div class="bot"><button class="btn btn-ai" id="btn-analyze" disabled onclick="goTo(5)">AI 분석 시작 (0/3)</button></div>
   </div>
 
   <!-- ═══ S5 AI ANALYSIS ═══ -->
@@ -628,7 +629,6 @@ function goTo(n){
 function goBack(){const c=parseInt(document.querySelector(".screen.active").id.replace("s",""));if(c>1&&c!==5)goTo(c-1);}
 function resetAll(){
   gender="";selConcerns.clear();capStep=0;captured=[];stream=null;scores={};aiRawData=null;isSimulation=false;
-  stableFrames=0;faceState='none';
   stopCam();
   document.getElementById("topbar").style.display="none";
   document.getElementById("prog-wrap").style.display="none";
@@ -684,258 +684,130 @@ function tgConcern(i){
 }
 
 // ══════════════════════════════════════════════════════════
-//  S4 CAMERA · 정면 단일 촬영 + 얼굴 자동 감지
+//  S4 CAMERA
 // ══════════════════════════════════════════════════════════
-
-// 얼굴 감지 상태
-let faceState='none'; // 'none' | 'partial' | 'good'
-let stableFrames=0;   // 안정 프레임 카운트
-const STABLE_NEEDED=8; // 8프레임 연속 안정 → 카운트다운 시작
-
+const CAP_CFG=[
+  {badge:"😊 정면을 바라보세요",dx:0,hint:"정면 · 얼굴이 타원에 맞으면\nAI가 자동 촬영합니다"},
+  {badge:"⬅ 고개를 왼쪽으로 45°",dx:-0.1,hint:"좌측 측면 · 타원에 맞추세요"},
+  {badge:"➡ 고개를 오른쪽으로 45°",dx:0.1,hint:"우측 측면 · 타원에 맞추세요"},
+];
 function startCam(){
   if(!navigator.mediaDevices){showToast("카메라를 지원하지 않는 환경입니다");return;}
-  navigator.mediaDevices.getUserMedia({
-    video:{facingMode:"user",width:{ideal:720},height:{ideal:960},frameRate:{ideal:30}}
-  }).then(s=>{
-    stream=s;
-    const v=document.getElementById("vid");
-    v.srcObject=s;v.style.display="block";
-    document.getElementById("cam-ph").style.display="none";
-    document.getElementById("align-hud").style.display="block";
-    document.getElementById("btn-cam").textContent="📹 작동 중";
-    document.getElementById("btn-cam").disabled=true;
-    v.onloadedmetadata=()=>{
-      const oc=document.getElementById("oc"),ac=document.getElementById("ac");
-      oc.width=v.videoWidth;oc.height=v.videoHeight;
-      oc.style.width="100%";oc.style.height="100%";
-      ac.width=v.videoWidth;ac.height=v.videoHeight;
-      detectLoop();
-    };
-  }).catch(e=>{
-    showToast("카메라 권한이 없습니다. 브라우저 설정에서 허용해주세요.");
-    console.error(e);
-  });
+  navigator.mediaDevices.getUserMedia({video:{facingMode:"user",width:{ideal:640},height:{ideal:854}}})
+    .then(s=>{
+      stream=s;const v=document.getElementById("vid");
+      v.srcObject=s;v.style.display="block";
+      document.getElementById("cam-ph").style.display="none";
+      document.getElementById("align-hud").style.display="block";
+      document.getElementById("btn-cam").textContent="📹 작동 중";
+      document.getElementById("btn-cam").disabled=true;
+      updateCapUI();
+      v.onloadedmetadata=()=>{
+        const oc=document.getElementById("oc"),ac=document.getElementById("ac");
+        oc.width=v.videoWidth;oc.height=v.videoHeight;
+        oc.style.width="100%";oc.style.height="100%";
+        ac.width=v.videoWidth;ac.height=v.videoHeight;
+        detectLoop();
+      };
+    }).catch(e=>{showToast("카메라 권한이 없습니다");console.error(e);});
 }
-
 function stopCam(){
   if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
   if(animId){cancelAnimationFrame(animId);animId=null;}
   clearCd();
-  stableFrames=0;faceState='none';
   const v=document.getElementById("vid");if(v)v.style.display="none";
   const hud=document.getElementById("align-hud");if(hud)hud.style.display="none";
   const ph=document.getElementById("cam-ph");if(ph)ph.style.display="flex";
   const bc=document.getElementById("btn-cam");if(bc){bc.disabled=false;bc.textContent="📷 카메라";}
   const so=document.getElementById("scan-overlay");if(so)so.style.display="none";
 }
-
-// YCbCr 피부색 판별 (다양한 피부톤 커버)
-function isSkin(r,g,b){
-  const Y=.299*r+.587*g+.114*b;
-  const Cb=-.169*r-.331*g+.5*b+128;
-  const Cr=.5*r-.419*g-.081*b+128;
-  return Y>40&&Y<240&&Cb>=75&&Cb<=135&&Cr>=128&&Cr<=180;
+function updateCapUI(){
+  if(capStep>=3)return;
+  const cfg=CAP_CFG[capStep];
+  document.getElementById("cam-badge").textContent=cfg.badge;
+  document.getElementById("cap-hint").innerHTML=cfg.hint;
 }
-
-// 얼굴 크기 유효성: 너무 가깝거나 멀지 않은지
-function checkFaceSize(skinRatioInner,skinRatioOuter){
-  // inner(작은 타원): 얼굴이 너무 가까우면 inner ratio 과도하게 높음
-  // outer - inner: 얼굴이 적절하면 outer에도 피부가 채워짐
-  if(skinRatioInner>0.80)return'close'; // 너무 가까움
-  if(skinRatioOuter<0.18)return'far';   // 너무 멀거나 얼굴 없음
-  if(skinRatioOuter>0.42&&skinRatioInner>0.38)return'good'; // 적정
-  if(skinRatioOuter>0.25)return'partial';
-  return'none';
-}
-
+function isSkin(r,g,b){const Y=.299*r+.587*g+.114*b,Cb=-.169*r-.331*g+.5*b+128,Cr=.5*r-.419*g-.081*b+128;return Y>60&&Cb>=77&&Cb<=127&&Cr>=133&&Cr<=173;}
 function detectLoop(){
-  if(!stream||capStep>=1)return;
+  if(!stream||capStep>=3)return;
   const v=document.getElementById("vid"),ac=document.getElementById("ac"),oc=document.getElementById("oc");
   if(!v.videoWidth){animId=requestAnimationFrame(detectLoop);return;}
-
-  const ctx=ac.getContext("2d");
-  ctx.drawImage(v,0,0,ac.width,ac.height);
-  const W=ac.width,H=ac.height;
-  // 정면 타원 (중앙)
-  const cx=W*.5,cy=H*.43,rx=W*.28,ry=H*.35;
-  // 내부 타원 (얼굴 크기 체크용, 더 작음)
-  const irx=rx*.65,iry=ry*.65;
+  const ctx=ac.getContext("2d");ctx.drawImage(v,0,0,ac.width,ac.height);
+  const W=ac.width,H=ac.height,dx=CAP_CFG[capStep].dx;
+  const cx=W*(.5+dx),cy=H*.44,rx=W*.27,ry=H*.36;
   const d=ctx.getImageData(0,0,W,H).data;
-
-  let skOuter=0,totOuter=0,skInner=0,totInner=0;
-  for(let y=Math.max(0,cy-ry);y<Math.min(H,cy+ry);y+=4){
-    for(let x=Math.max(0,cx-rx);x<Math.min(W,cx+rx);x+=4){
-      const nx=(x-cx)/rx,ny=(y-cy)/ry;
-      if(nx*nx+ny*ny>1)continue;
-      const idx=(Math.floor(y)*W+Math.floor(x))*4;
-      const skin=isSkin(d[idx],d[idx+1],d[idx+2]);
-      totOuter++;if(skin)skOuter++;
-      // 내부 타원 체크
-      const nxi=(x-cx)/irx,nyi=(y-cy)/iry;
-      if(nxi*nxi+nyi*nyi<=1){totInner++;if(skin)skInner++;}
+  let sk=0,tot=0;
+  for(let y=Math.max(0,cy-ry);y<Math.min(H,cy+ry);y+=5)
+    for(let x=Math.max(0,cx-rx);x<Math.min(W,cx+rx);x+=5){
+      const nx=(x-cx)/rx,ny=(y-cy)/ry;if(nx*nx+ny*ny>1)continue;
+      const i=(Math.floor(y)*W+Math.floor(x))*4;tot++;if(isSkin(d[i],d[i+1],d[i+2]))sk++;
     }
-  }
-  const ratioOuter=totOuter>0?skOuter/totOuter:0;
-  const ratioInner=totInner>0?skInner/totInner:0;
-  alignRatio=ratioOuter;
-
-  const newState=checkFaceSize(ratioInner,ratioOuter);
-  drawGuideEnhanced(oc,W,H,cx,cy,rx,ry,newState);
-  updateHUD(newState);
-
-  // 안정 프레임 누적
-  if(newState==='good'){
-    stableFrames=Math.min(stableFrames+1,STABLE_NEEDED+5);
-  } else {
-    stableFrames=Math.max(0,stableFrames-2);
-  }
-
-  if(stableFrames>=STABLE_NEEDED&&!cdRunning)startCd();
-  else if(stableFrames<STABLE_NEEDED&&cdRunning)clearCd();
-
+  alignRatio=tot>0?sk/tot:0;
+  drawGuide(oc,W,H,cx,cy,rx,ry,alignRatio);
+  const dot=document.getElementById("adot"),txt=document.getElementById("atxt");
+  if(alignRatio>.42){dot.className="adot g";txt.textContent="완벽해요! 유지해주세요";}
+  else if(alignRatio>.22){dot.className="adot p";txt.textContent="조금 더 맞춰주세요...";}
+  else{dot.className="adot";txt.textContent="얼굴을 타원 안에 위치시키세요";}
+  if(alignRatio>.42&&!cdRunning)startCd();
+  else if(alignRatio<=.42&&cdRunning)clearCd();
   animId=requestAnimationFrame(detectLoop);
 }
-
-function updateHUD(state){
-  const dot=document.getElementById("adot");
-  const txt=document.getElementById("atxt");
-  const badge=document.getElementById("cam-badge");
-  const msgs={
-    none:  {dot:"",    txt:"얼굴을 타원 안에 맞춰주세요",   badge:"🔍 얼굴을 인식하는 중..."},
-    far:   {dot:"",    txt:"얼굴이 너무 멀어요. 가까이 오세요", badge:"📏 조금 더 가까이"},
-    close: {dot:"p",   txt:"너무 가까워요. 조금 물러서세요", badge:"↔️ 조금 멀리"},
-    partial:{dot:"p",  txt:"조금 더 정면으로 맞춰주세요",   badge:"😊 거의 됐어요..."},
-    good:  {dot:"g",   txt:"완벽해요! 유지해주세요 ✨",     badge:"✅ 얼굴 인식 완료"},
-  };
-  const m=msgs[state]||msgs.none;
-  dot.className="adot"+(m.dot?" "+m.dot:"");
-  txt.textContent=m.txt;
-  badge.textContent=m.badge;
-}
-
-// 향상된 가이드 그리기 (얼굴 위치 피드백 포함)
-function drawGuideEnhanced(oc,W,H,cx,cy,rx,ry,state){
-  const ctx=oc.getContext("2d");
-  ctx.clearRect(0,0,W,H);
-  // 배경 다크 마스크
-  ctx.save();ctx.fillStyle="rgba(0,0,0,.50)";
+function drawGuide(oc,W,H,cx,cy,rx,ry,ratio){
+  const ctx=oc.getContext("2d");ctx.clearRect(0,0,W,H);
+  ctx.save();ctx.fillStyle="rgba(0,0,0,.48)";
   ctx.beginPath();ctx.rect(0,0,W,H);
-  ctx.ellipse(cx,cy,rx,ry,0,Math.PI*2,0,true);
-  ctx.fill("evenodd");ctx.restore();
-  // 타원 테두리 색
-  const col=state==='good'?"#4CAF7A":state==='partial'||state==='close'?"#D08020":"#CC3C3C";
-  // 타원 글로우
-  ctx.save();ctx.shadowColor=col;ctx.shadowBlur=state==='good'?32:16;
-  ctx.strokeStyle=col;ctx.lineWidth=state==='good'?3:2;
+  ctx.ellipse(cx,cy,rx,ry,0,Math.PI*2,0,true);ctx.fill("evenodd");ctx.restore();
+  const col=ratio>.42?"#4CAF7A":ratio>.22?"#D08020":"#CC3C3C";
+  ctx.save();ctx.shadowColor=col;ctx.shadowBlur=24;ctx.strokeStyle=col;ctx.lineWidth=2.5;
   ctx.beginPath();ctx.ellipse(cx,cy,rx,ry,0,0,Math.PI*2);ctx.stroke();ctx.restore();
-  // 안쪽 점선 가이드
-  ctx.save();ctx.strokeStyle="rgba(255,255,255,.15)";ctx.lineWidth=1;ctx.setLineDash([4,8]);
-  ctx.beginPath();ctx.ellipse(cx,cy,rx*.82,ry*.82,0,0,Math.PI*2);ctx.stroke();ctx.restore();
-  // 코너 마커
-  const corners=[[cx-rx*.72,cy-ry*.85,1,0,0,1],[cx+rx*.72,cy-ry*.85,-1,0,0,1],
-                  [cx-rx*.72,cy+ry*.85,1,0,0,-1],[cx+rx*.72,cy+ry*.85,-1,0,0,-1]];
-  corners.forEach(([x,y,hx,,vy])=>{
+  ctx.save();ctx.strokeStyle="rgba(255,255,255,.18)";ctx.lineWidth=1;ctx.setLineDash([5,9]);
+  ctx.beginPath();ctx.ellipse(cx,cy,rx*.87,ry*.87,0,0,Math.PI*2);ctx.stroke();ctx.restore();
+  [[cx-rx*.7,cy-ry,1,0,0,1],[cx+rx*.7,cy-ry,-1,0,0,1],[cx-rx*.7,cy+ry,1,0,0,-1],[cx+rx*.7,cy+ry,-1,0,0,-1]].forEach(([x,y,hx,hy,vx,vy])=>{
     ctx.save();ctx.strokeStyle=col;ctx.lineWidth=2.5;ctx.lineCap="round";ctx.setLineDash([]);
-    ctx.shadowColor=col;ctx.shadowBlur=8;
-    ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+hx*18,y);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x,y+vy*18);ctx.stroke();
-    ctx.restore();
+    ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+hx*20,y);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x,y+vy*20);ctx.stroke();ctx.restore();
   });
-  // 코 기준선 (정면 얼굴 위치 가이드)
-  ctx.save();ctx.strokeStyle="rgba(255,255,255,.08)";ctx.lineWidth=1;ctx.setLineDash([3,6]);
-  ctx.beginPath();ctx.moveTo(cx,cy-ry*.3);ctx.lineTo(cx,cy+ry*.3);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(cx-rx*.3,cy);ctx.lineTo(cx+rx*.3,cy);ctx.stroke();
-  ctx.restore();
 }
-
 function startCd(){
-  if(cdRunning||capStep>=1)return;
-  cdRunning=true;
+  if(cdRunning||capStep>=3)return;cdRunning=true;
   const cw=document.getElementById("cd-wrap"),ring=document.getElementById("cd-ring"),num=document.getElementById("cd-num");
   cw.style.display="flex";ring.style.strokeDashoffset="0";num.textContent="3";
   const total=3000,iv=50;let el=0;
   cdTimer=setInterval(()=>{
-    if(stableFrames<STABLE_NEEDED-2){clearCd();return;} // 얼굴 빠지면 취소
-    el+=iv;
-    const rem=Math.max(0,Math.ceil((total-el)/1000));
+    if(alignRatio<.42){clearCd();return;}
+    el+=iv;const rem=Math.max(0,Math.ceil((total-el)/1000));
     num.textContent=rem>0?rem:"📸";
     ring.style.strokeDashoffset=213.6*(1-el/total);
     if(el>=total){clearCd();doSnap();}
   },iv);
 }
-
-function clearCd(){
-  if(cdTimer){clearInterval(cdTimer);cdTimer=null;}
-  cdRunning=false;
-  const cw=document.getElementById("cd-wrap");if(cw)cw.style.display="none";
-  const r=document.getElementById("cd-ring");if(r)r.style.strokeDashoffset="213.6";
-}
+function clearCd(){if(cdTimer){clearInterval(cdTimer);cdTimer=null;}cdRunning=false;const cw=document.getElementById("cd-wrap");if(cw)cw.style.display="none";const r=document.getElementById("cd-ring");if(r)r.style.strokeDashoffset="213.6";}
 
 function showScanFlash(){
   const so=document.getElementById("scan-overlay");
-  if(so){so.style.display="block";setTimeout(()=>so.style.display="none",1200);}
+  if(so){so.style.display="block";setTimeout(()=>so.style.display="none",1500);}
 }
-
 function doSnap(){
   showScanFlash();
   setTimeout(()=>{
     const v=document.getElementById("vid"),ac=document.getElementById("ac");
-    if(!v||!v.videoWidth)return;
-    const ctx=ac.getContext("2d");
-    ctx.drawImage(v,0,0,ac.width,ac.height);
-    const url=ac.toDataURL("image/jpeg",.90);
-    captured[0]=url;
-    capStep=1;
-    // 썸네일 업데이트
-    const th=document.getElementById("th-0");
-    if(th)th.innerHTML=`<img src="${url}" alt=""/><div class="th-tick">✓</div>`;
-    // 완료 오버레이 표시
-    const overlay=document.getElementById("cap-done-overlay");
-    if(overlay){overlay.style.display="flex";setTimeout(()=>{overlay.style.display="none";},1800);}
-    // 가이드 업데이트
-    document.getElementById("cap-hint").innerHTML="✅ 촬영 완료!<br>AI 분석 시작을 눌러주세요.";
-    document.getElementById("btn-analyze").disabled=false;
-    document.getElementById("btn-analyze").textContent="AI 분석 시작 →";
-    showToast("📸 촬영 완료!");
-    stopCam();
-  },400);
+    if(!v.videoWidth)return;
+    const ctx=ac.getContext("2d");ctx.drawImage(v,0,0,ac.width,ac.height);
+    const url=ac.toDataURL("image/jpeg",.85);
+    captured[capStep]=url;
+    const th=document.getElementById("th-"+capStep);
+    th.innerHTML=`<img src="${url}" alt=""/><div class="th-tick">✓</div>`;
+    showToast(["정면","좌측","우측"][capStep]+" 촬영 ✓");
+    document.getElementById("cs-"+capStep).classList.remove("active");
+    document.getElementById("cs-"+capStep).classList.add("done");
+    document.getElementById("cn-"+capStep).textContent="✓";
+    if(capStep<2){document.getElementById("cl-"+capStep).classList.add("done");capStep++;document.getElementById("cs-"+capStep).classList.add("active");updateCapUI();setTimeout(()=>{cdRunning=false;},700);}
+    else{capStep=3;stopCam();document.getElementById("btn-analyze").disabled=false;document.getElementById("btn-analyze").textContent="AI 분석 시작 ✓ (3/3)";document.getElementById("cap-hint").innerHTML="✅ 3방향 촬영 완료!\nAI 분석 시작을 눌러주세요";}
+  },1300);
 }
-
-function manualSnap(){
-  if(!stream){showToast("카메라를 먼저 시작하세요");return;}
-  if(capStep>=1){showToast("이미 촬영됐습니다. 다시 하려면 ↺ 버튼을 누르세요");return;}
-  clearCd();doSnap();
-}
-
-function resetCap(){
-  capStep=0;captured=[];stableFrames=0;faceState='none';
-  stopCam();clearCd();cdRunning=false;
-  const th=document.getElementById("th-0");
-  if(th)th.innerHTML=`<span style="font-size:10px;color:var(--soft)">정면</span>`;
-  document.getElementById("cap-hint").innerHTML=
-    "📌 <strong>촬영 가이드</strong><br>밝은 곳에서 정면을 바라보세요<br>타원 초록색 → 자동 촬영 (3초)";
-  document.getElementById("btn-analyze").disabled=true;
-  document.getElementById("btn-analyze").textContent="AI 분석 시작";
-  const overlay=document.getElementById("cap-done-overlay");
-  if(overlay)overlay.style.display="none";
-}
-
-function fileSnap(e){
-  const f=e.target.files[0];if(!f)return;
-  const r=new FileReader();
-  r.onload=ev=>{
-    captured[0]=ev.target.result;
-    capStep=1;
-    const th=document.getElementById("th-0");
-    if(th)th.innerHTML=`<img src="${ev.target.result}" alt=""/><div class="th-tick">✓</div>`;
-    document.getElementById("cap-hint").innerHTML="✅ 이미지 업로드 완료!<br>AI 분석 시작을 눌러주세요.";
-    document.getElementById("btn-analyze").disabled=false;
-    document.getElementById("btn-analyze").textContent="AI 분석 시작 →";
-    showToast("🖼️ 업로드 완료 ✓");
-  };
-  r.readAsDataURL(f);
-  e.target.value="";
-}
+function manualSnap(){if(!stream){showToast("카메라를 먼저 시작하세요");return;}if(capStep>=3){showToast("이미 완료됐습니다");return;}clearCd();doSnap();}
+function resetCap(){capStep=0;captured=[];stopCam();clearCd();cdRunning=false;[0,1,2].forEach(i=>{document.getElementById("cs-"+i).className="cap-step"+(i===0?" active":"");document.getElementById("cn-"+i).textContent=i+1;document.getElementById("th-"+i).innerHTML=["정면","좌측","우측"][i];});[0,1].forEach(i=>{const cl=document.getElementById("cl-"+i);if(cl)cl.classList.remove("done");});document.getElementById("btn-analyze").disabled=true;document.getElementById("btn-analyze").textContent="AI 분석 시작 (0/3)";updateCapUI();}
+function fileSnap(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{captured[capStep]=ev.target.result;const th=document.getElementById("th-"+capStep);th.innerHTML=`<img src="${ev.target.result}" alt=""/><div class="th-tick">✓</div>`;document.getElementById("cs-"+capStep).classList.add("done");document.getElementById("cn-"+capStep).textContent="✓";if(capStep<2){capStep++;}else{capStep=3;document.getElementById("btn-analyze").disabled=false;document.getElementById("btn-analyze").textContent="AI 분석 시작 ✓";};showToast("업로드 완료 ✓");};r.readAsDataURL(f);e.target.value="";}
 
 // ══════════════════════════════════════════════════════════
 //  S5 · REAL AI ANALYSIS
@@ -1119,7 +991,7 @@ async function runAIAnalysis(){
   userName=document.getElementById("inp-name")?.value||"사용자";
 
   // Show front image in analysis screen
-  const frontImg=captured[0]||"";
+  const frontImg=captured[0]||captured[1]||captured[2]||"";
   const imgEl=document.getElementById("analysis-img");
   if(frontImg){imgEl.src=frontImg;document.getElementById("img-scan-beam").classList.add("active");}
   else{document.getElementById("analysis-img-wrap").style.display="none";}
